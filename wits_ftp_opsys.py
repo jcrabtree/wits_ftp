@@ -49,7 +49,6 @@ from pandas import *
 import time
 import logging
 import logging.handlers
-import HTML
 import argparse
 
 #############################################################################################################################################################################        
@@ -167,7 +166,6 @@ class wits_ftp():
         self.sregion_txt = None        
         self.live5exists = False
         self.ftp_error = False
-        self.html_txt = None
         self.stats = None
         self.timelag = 15
 
@@ -381,11 +379,11 @@ class wits_ftp():
         #Format up a string for aleat purposes that gives max info. limit 160 characters...
         str_tup_m5 = (str('$%.2f' % m5_max.values()[0]).rjust(dgs,' '),m5_max.keys()[0],str('$%.2f' % m5_mean).center(dgs,' '),m5_min.keys()[0],str('$%.2f' % m5_min.values()[0]).ljust(dgs,' '),u"\u03C3" + '=' + str('%.1f' % m5_std).rjust(6,' '),'S=' + str('%.2f' % m5_skew).rjust(6,' '),'K=' + str('%.2f' % m5_kurt).rjust(6,' '))
         self.m5 = '%s@%s<%s>%s@%s|%s|%s|%s| ' % str_tup_m5 + self.nregion_txt
-        self.price_html()  #write html file
+        self.croppeddata()  #crop data and save
         
 
     #############################################################################################################################################################################                            
-    def price_html(self):    #This needs work, including plotting figures and adding this to the HTML file - easy fixes 
+    def croppeddata(self):    #Crop data and save 
     #############################################################################################################################################################################                    
         
         i5w_hr = self.crop_data(self.i5w,7,0)
@@ -397,26 +395,6 @@ class wits_ftp():
         ((r5w_hr.T)/100.0).to_csv(self.wits_path + 'region_week.csv',float_format='%.2f')
         ((l5w_hr.T)/100.0).to_csv(self.wits_path + 'all_week.csv',float_format='%.2f')
         statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.2f')
-
-        self.html_txt1 = i5w_hr.to_html(float_format = lambda x: '%.2f' % x)
-        self.html_txt2 = r5w_hr.to_html(float_format = lambda x: '%.2f' % x)
-        self.html_txt3 = l5w_hr.to_html(float_format = lambda x: '%.2f' % x)
-        self.html_txt0 = statsw_hr.to_html(float_format = lambda x: '%.2f' % x)
-
-        f = open(self.wits_path + 'index.html','wb')
-        refresh_cmd = r"""<META HTTP-EQUIV="REFRESH" CONTENT="300">"""
-        heading = r"""<h1>Current GXP dispatch prices</h1>"""
-        paragraph=r"""<p>5m = 5 minute dispatch price, TP = average trading period price, dy = daily rolling average.</p>"""
-        last_updated = r"""<p> Last updated:""" + self.dto.ctime() + r"""</p>"""
-        f.write(heading)
-        f.write(paragraph)
-        f.write(last_updated)
-        f.write(refresh_cmd)
-        f.write(self.html_txt0)
-        f.write(self.html_txt1)
-        f.write(self.html_txt2)
-        f.write(self.html_txt3)
-        f.close()
             
     #############################################################################################################################################################################                                    
     def save_dataframes(self):
