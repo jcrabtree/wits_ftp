@@ -1,0 +1,13 @@
+This software monitors and stores the real-time (5 minute) dispatch prices, at every GXP, and every five minutes.
+
+Initial implementations of this software utilising loops in a single python process eventually failed, for one of many reasons, and required restarting, which was hopeless.
+To over-come this a linux box has been set up and the operating system (CRON) used to poll the NZX WITS FTP servive every 5 minutes.
+
+This is currently achieved (as at 23 January 2013) with a linux box running Ubuntu 12.04 LTS
+
+The crontab line looks like this:
+
+*/5 * * * * /usr/bin/python /home/dave/python/wits_ftp/wits_ftp_opsys.py >> /home/dave/python/wits_ftp/wits_ftp_op_sys_cron.log 2>&1
+
+23 January 2013 - now tracking this software using the GIT and GITHUB.
+
