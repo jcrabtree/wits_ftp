@@ -1,0 +1,123 @@
+
+html {
+  min-width: 2080px;
+  /* background-color: white; */
+  background-color: #666;
+}
+
+body {
+  position: relative;
+  background-color: white;
+  font-family: "Helvetica Neue", sans-serif;
+  margin: 1em auto 4em auto;
+  width: 2016px;
+  padding: 15px;
+}
+
+h1 {
+  font-size: 50px;
+  font-family: "Verdana";
+  font-weight: 200;
+}
+
+h2 {
+  font-family: "Verdana";
+  margin-top: 2em;
+  font-weight: 400;
+}
+
+h1, h2 {
+  text-rendering: optimizeLegibility;
+}
+
+footer {
+  font-size: small;
+  margin-top: 8em;
+}
+
+header aside {
+  margin-top: 82px;
+}
+
+header aside,
+footer aside {
+  color: #636363;
+  text-align: right;
+  width: 1200px
+}
+
+aside {
+  font-size: 10px;
+  left: 1720px;
+  position: absolute;
+  width: 280px;
+}
+
+.attribution {
+  font-size: small;
+  margin-bottom: 2em;
+}
+
+body > p, li > p {
+  line-height: 1.5em;
+}
+
+body > p {
+  width: 720px;
+}
+
+body > blockquote {
+  width: 640px;
+}
+
+li {
+  width: 680px;
+}
+
+a {
+  color: midnightblue;
+}
+
+a:not(:hover) {
+  text-decoration: none;
+}
+
+pre, code, textarea {
+  font-family: "Menlo", monospace;
+}
+
+textarea {
+  font-size: 100%;
+}
+
+body > pre {
+    display: block;
+    padding: 0.5em;
+    width: 720px;
+    border: dashed 1px #666;
+    font-size: 90%;
+    line-height: 1.25em;
+}
+
+sup, sub {
+  line-height: 0;
+}
+
+q:before,
+blockquote:before {
+  content: "â€œ";
+}
+
+q:after,
+blockquote:after {
+  content: "â€";
+}
+
+blockquote:before {
+  position: absolute;
+  left: 2em;
+}
+
+blockquote:after {
+  position: absolute;
+}

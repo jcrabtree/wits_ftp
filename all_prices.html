@@ -1,0 +1,626 @@
+<META HTTP-EQUIV="REFRESH" CONTENT="300">
+<html><head><title>NZ real time gxp price monitor</title>
+<script src="d3.v2.min.js"></script> 
+<script src="cubism.v1.js"></script>
+
+<style>
+  @import url(./style.css);
+
+  svg {
+    font: 15px sans-serif;
+  }
+
+  .axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .axis {
+    font: 15px sans-serif;
+  }
+
+  .axis text {
+    -webkit-transition: fill-opacity 250ms linear;
+  }
+
+  .axis path {
+    display: none;
+  }
+
+  .axis line {
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .horizon {
+    border-bottom: solid 1px #000;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .horizon {
+    border-top: solid 1px #000;
+    border-bottom: solid 1px #000;
+  }
+
+  .horizon + .horizon {
+    border-top: none;
+  }
+
+  .horizon canvas {
+    display: block;
+  }
+
+  .horizon .title,
+  .horizon .value {
+    bottom: 0;
+    line-height: 30px;
+    margin: 0 6px;
+    position: absolute;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+    white-space: nowrap;
+    font: 24px Courier New;
+    font-weight:bold;
+  }
+
+  .horizon .title {
+    left: 0;
+  }
+
+  .horizon .value {
+    right: 0;
+  }
+
+  .line {
+    background: #000;
+    opacity: .2;
+    z-index: 2;
+  }
+</style>
+
+</head><body><header>
+  <aside>January 17, 2013</aside>
+  <a href="http://eyther.com/ieso/generation/">Example from http://eyther.com/ieso/generation/</a>
+</header>
+
+<h1>realtime price monitor</h1>
+<h3>Northland</h3>
+<div id="visNL"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Auckland</h3>
+<div id="visAK"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Waikato</h3>
+<div id="visHM"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Bay of Plenty</h3>
+<div id="visBP"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Hawkes Bay</h3>
+<div id="visNR"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Taranaki/Palmerston North</h3>
+<div id="visPN"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Lower North Island/Wellington</h3>
+<div id="visWN"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Upper South Island/Westcoast</h3>
+<div id="visWC"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Canterbury/Christchurch</h3>
+<div id="visCH"></div>
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+
+<h3>Lower South Island</h3>
+<div id="visIN"></div>
+
+<aside>
+  Mouse over the graph to inspect values.
+</aside>
+
+<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a></p>
+
+
+<p>This page (updated every five minutes) illustrates real-time prices over the NZ electricity market over the past week.  </p>
+ 
+It uses Javascript/D3 with the <a href="http://square.github.com/cubism/">cubism</a> library.
+
+<!--</p><p>These types of plots are called <a href="http://vis.berkeley.edu/papers/horizon/">horizon charts</a> which allow information to be compactly represented in a small amount of vertical space.-->
+
+<!--</p><p>Thanks to <a href="http://bost.ocks.org/mike/">Mike Bostock</a> for creating the great <a href="https://github.com/square/cubism">cubism</a> and <a href="http://d3js.org/">d3</a> libraries.-->
+
+
+<script>
+d3.csv("all_week.csv", function(data) {
+  if (!data) return new Error("unable to load data");
+
+  var context = cubism.context()
+    .serverDelay(30 * 1000) // allow 30 seconds of collection lag
+    .clientDelay(60 * 1000 *15) //allow approx. 15 minutes for wits/ftp lag
+    .step(5 * 60 * 1000) // five minutes per value
+    .size(data.length);  ; // fetch 400 values (1080p)
+
+  var <!--REGION NL-->
+ALB0331=context.csv(data).metric("ALB0331"),
+ALB1101=context.csv(data).metric("ALB1101"),
+BRB0331=context.csv(data).metric("BRB0331"),
+DAR0111=context.csv(data).metric("DAR0111"),
+KEN0331=context.csv(data).metric("KEN0331"),
+KOE1101=context.csv(data).metric("KOE1101"),
+MDN1101=context.csv(data).metric("MDN1101"),
+MDN2201=context.csv(data).metric("MDN2201"),
+MPE0331=context.csv(data).metric("MPE0331"),
+MTO0331=context.csv(data).metric("MTO0331"),
+SVL0331=context.csv(data).metric("SVL0331"),
+WEL0331=context.csv(data).metric("WEL0331"),
+<!--REGION AK-->
+BOB0331=context.csv(data).metric("BOB0331"),
+BOB1101=context.csv(data).metric("BOB1101"),
+GLN0331=context.csv(data).metric("GLN0331"),
+GLN0332=context.csv(data).metric("GLN0332"),
+HEN0331=context.csv(data).metric("HEN0331"),
+HEN2201=context.csv(data).metric("HEN2201"),
+HEP0331=context.csv(data).metric("HEP0331"),
+MER0331=context.csv(data).metric("MER0331"),
+MNG0331=context.csv(data).metric("MNG0331"),
+MNG1101=context.csv(data).metric("MNG1101"),
+OTA0221=context.csv(data).metric("OTA0221"),
+OTA1101=context.csv(data).metric("OTA1101"),
+OTA1102=context.csv(data).metric("OTA1102"),
+OTA2201=context.csv(data).metric("OTA2201"),
+OTA2202=context.csv(data).metric("OTA2202"),
+PAK0331=context.csv(data).metric("PAK0331"),
+PEN0221=context.csv(data).metric("PEN0221"),
+PEN0251=context.csv(data).metric("PEN0251"),
+PEN0331=context.csv(data).metric("PEN0331"),
+PEN1101=context.csv(data).metric("PEN1101"),
+ROS0221=context.csv(data).metric("ROS0221"),
+ROS1101=context.csv(data).metric("ROS1101"),
+SWN2201=context.csv(data).metric("SWN2201"),
+TAK0331=context.csv(data).metric("TAK0331"),
+WIR0331=context.csv(data).metric("WIR0331"),
+<!--REGION HM-->
+ARA2201=context.csv(data).metric("ARA2201"),
+ARI1101=context.csv(data).metric("ARI1101"),
+ARI1102=context.csv(data).metric("ARI1102"),
+ATI2201=context.csv(data).metric("ATI2201"),
+CBG0111=context.csv(data).metric("CBG0111"),
+HAM0111=context.csv(data).metric("HAM0111"),
+HAM0331=context.csv(data).metric("HAM0331"),
+HAM0551=context.csv(data).metric("HAM0551"),
+HAM2201=context.csv(data).metric("HAM2201"),
+HIN0331=context.csv(data).metric("HIN0331"),
+HLY0331=context.csv(data).metric("HLY0331"),
+HLY2201=context.csv(data).metric("HLY2201"),
+HTI0331=context.csv(data).metric("HTI0331"),
+KPO1101=context.csv(data).metric("KPO1101"),
+KPU0661=context.csv(data).metric("KPU0661"),
+MTI2201=context.csv(data).metric("MTI2201"),
+NAP2201=context.csv(data).metric("NAP2201"),
+NAP2202=context.csv(data).metric("NAP2202"),
+OKI2201=context.csv(data).metric("OKI2201"),
+OKN0111=context.csv(data).metric("OKN0111"),
+ONG0331=context.csv(data).metric("ONG0331"),
+PAO1101=context.csv(data).metric("PAO1101"),
+PPI2201=context.csv(data).metric("PPI2201"),
+RPO2201=context.csv(data).metric("RPO2201"),
+THI2201=context.csv(data).metric("THI2201"),
+TKU0331=context.csv(data).metric("TKU0331"),
+TKU2201=context.csv(data).metric("TKU2201"),
+TMN0551=context.csv(data).metric("TMN0551"),
+TMU0111=context.csv(data).metric("TMU0111"),
+TMU1101=context.csv(data).metric("TMU1101"),
+TWH0331=context.csv(data).metric("TWH0331"),
+WHU0331=context.csv(data).metric("WHU0331"),
+WKM2201=context.csv(data).metric("WKM2201"),
+WKO0331=context.csv(data).metric("WKO0331"),
+WPA2201=context.csv(data).metric("WPA2201"),
+WRK0331=context.csv(data).metric("WRK0331"),
+WRK2201=context.csv(data).metric("WRK2201"),
+<!--REGION BP-->
+EDG0331=context.csv(data).metric("EDG0331"),
+KAW0111=context.csv(data).metric("KAW0111"),
+KAW0112=context.csv(data).metric("KAW0112"),
+KAW0113=context.csv(data).metric("KAW0113"),
+KAW1101=context.csv(data).metric("KAW1101"),
+KAW2201=context.csv(data).metric("KAW2201"),
+KIN0111=context.csv(data).metric("KIN0111"),
+KIN0112=context.csv(data).metric("KIN0112"),
+KIN0113=context.csv(data).metric("KIN0113"),
+KIN0331=context.csv(data).metric("KIN0331"),
+KMO0331=context.csv(data).metric("KMO0331"),
+LFD1101=context.csv(data).metric("LFD1101"),
+LFD1102=context.csv(data).metric("LFD1102"),
+MAT1101=context.csv(data).metric("MAT1101"),
+MAT1102=context.csv(data).metric("MAT1102"),
+MTM0331=context.csv(data).metric("MTM0331"),
+OHK2201=context.csv(data).metric("OHK2201"),
+OWH0111=context.csv(data).metric("OWH0111"),
+ROT0111=context.csv(data).metric("ROT0111"),
+ROT0331=context.csv(data).metric("ROT0331"),
+ROT1101=context.csv(data).metric("ROT1101"),
+TGA0111=context.csv(data).metric("TGA0111"),
+TGA0331=context.csv(data).metric("TGA0331"),
+TKH0111=context.csv(data).metric("TKH0111"),
+TMI0331=context.csv(data).metric("TMI0331"),
+TRK0111=context.csv(data).metric("TRK0111"),
+TRK2201=context.csv(data).metric("TRK2201"),
+WAI0111=context.csv(data).metric("WAI0111"),
+<!--REGION NR-->
+DVK0111=context.csv(data).metric("DVK0111"),
+FHL0331=context.csv(data).metric("FHL0331"),
+GIS0501=context.csv(data).metric("GIS0501"),
+GYT0331=context.csv(data).metric("GYT0331"),
+MGM0331=context.csv(data).metric("MGM0331"),
+MST0331=context.csv(data).metric("MST0331"),
+RDF0331=context.csv(data).metric("RDF0331"),
+RDF2201=context.csv(data).metric("RDF2201"),
+TUI0111=context.csv(data).metric("TUI0111"),
+TUI1101=context.csv(data).metric("TUI1101"),
+WDV0111=context.csv(data).metric("WDV0111"),
+WDV1101=context.csv(data).metric("WDV1101"),
+WHI0111=context.csv(data).metric("WHI0111"),
+WHI2201=context.csv(data).metric("WHI2201"),
+WPW0331=context.csv(data).metric("WPW0331"),
+WRA0111=context.csv(data).metric("WRA0111"),
+WTU0331=context.csv(data).metric("WTU0331"),
+<!--REGION PN-->
+BPE0331=context.csv(data).metric("BPE0331"),
+BPE0551=context.csv(data).metric("BPE0551"),
+BPE2201=context.csv(data).metric("BPE2201"),
+BRK0331=context.csv(data).metric("BRK0331"),
+CST0331=context.csv(data).metric("CST0331"),
+HUI0331=context.csv(data).metric("HUI0331"),
+HWA0331=context.csv(data).metric("HWA0331"),
+HWA0332=context.csv(data).metric("HWA0332"),
+HWA1101=context.csv(data).metric("HWA1101"),
+HWA1102=context.csv(data).metric("HWA1102"),
+KPA1101=context.csv(data).metric("KPA1101"),
+LTN0331=context.csv(data).metric("LTN0331"),
+MHO0331=context.csv(data).metric("MHO0331"),
+MKE1101=context.csv(data).metric("MKE1101"),
+MNI0111=context.csv(data).metric("MNI0111"),
+MTN0331=context.csv(data).metric("MTN0331"),
+MTR0331=context.csv(data).metric("MTR0331"),
+NPL0331=context.csv(data).metric("NPL0331"),
+NPL1101=context.csv(data).metric("NPL1101"),
+NPL2201=context.csv(data).metric("NPL2201"),
+OPK0331=context.csv(data).metric("OPK0331"),
+SFD0331=context.csv(data).metric("SFD0331"),
+SFD2201=context.csv(data).metric("SFD2201"),
+TNG0111=context.csv(data).metric("TNG0111"),
+TNG0551=context.csv(data).metric("TNG0551"),
+TWC2201=context.csv(data).metric("TWC2201"),
+WGN0331=context.csv(data).metric("WGN0331"),
+WVY0111=context.csv(data).metric("WVY0111"),
+<!--REGION WN-->
+CPK0111=context.csv(data).metric("CPK0111"),
+CPK0331=context.csv(data).metric("CPK0331"),
+GFD0331=context.csv(data).metric("GFD0331"),
+HAY0111=context.csv(data).metric("HAY0111"),
+HAY0331=context.csv(data).metric("HAY0331"),
+HAY1101=context.csv(data).metric("HAY1101"),
+HAY2201=context.csv(data).metric("HAY2201"),
+KWA0111=context.csv(data).metric("KWA0111"),
+MLG0111=context.csv(data).metric("MLG0111"),
+MLG0331=context.csv(data).metric("MLG0331"),
+PNI0331=context.csv(data).metric("PNI0331"),
+PRM0331=context.csv(data).metric("PRM0331"),
+TKR0331=context.csv(data).metric("TKR0331"),
+UHT0331=context.csv(data).metric("UHT0331"),
+WIL0331=context.csv(data).metric("WIL0331"),
+WWD1102=context.csv(data).metric("WWD1102"),
+WWD1103=context.csv(data).metric("WWD1103"),
+<!--REGION WC-->
+APS0111=context.csv(data).metric("APS0111"),
+ARG1101=context.csv(data).metric("ARG1101"),
+ATU1101=context.csv(data).metric("ATU1101"),
+BLN0331=context.csv(data).metric("BLN0331"),
+CLH0111=context.csv(data).metric("CLH0111"),
+COB0661=context.csv(data).metric("COB0661"),
+COL0111=context.csv(data).metric("COL0111"),
+COL0661=context.csv(data).metric("COL0661"),
+DOB0331=context.csv(data).metric("DOB0331"),
+DOB0661=context.csv(data).metric("DOB0661"),
+GYM0661=context.csv(data).metric("GYM0661"),
+HKK0661=context.csv(data).metric("HKK0661"),
+HOR0331=context.csv(data).metric("HOR0331"),
+HOR0661=context.csv(data).metric("HOR0661"),
+KIK0111=context.csv(data).metric("KIK0111"),
+KUM0661=context.csv(data).metric("KUM0661"),
+MCH0111=context.csv(data).metric("MCH0111"),
+MOT0111=context.csv(data).metric("MOT0111"),
+MPI0661=context.csv(data).metric("MPI0661"),
+ORO1101=context.csv(data).metric("ORO1101"),
+ORO1102=context.csv(data).metric("ORO1102"),
+OTI0111=context.csv(data).metric("OTI0111"),
+RFN1101=context.csv(data).metric("RFN1101"),
+RFN1102=context.csv(data).metric("RFN1102"),
+STK0331=context.csv(data).metric("STK0331"),
+STK2201=context.csv(data).metric("STK2201"),
+WPT0111=context.csv(data).metric("WPT0111"),
+<!--REGION CH-->
+ABY0111=context.csv(data).metric("ABY0111"),
+ADD0111=context.csv(data).metric("ADD0111"),
+ADD0661=context.csv(data).metric("ADD0661"),
+ASB0331=context.csv(data).metric("ASB0331"),
+ASB0661=context.csv(data).metric("ASB0661"),
+ASY0111=context.csv(data).metric("ASY0111"),
+BRY0111=context.csv(data).metric("BRY0111"),
+BRY0661=context.csv(data).metric("BRY0661"),
+CUL0331=context.csv(data).metric("CUL0331"),
+CUL0661=context.csv(data).metric("CUL0661"),
+ISL0331=context.csv(data).metric("ISL0331"),
+ISL0661=context.csv(data).metric("ISL0661"),
+ISL2201=context.csv(data).metric("ISL2201"),
+KAI0111=context.csv(data).metric("KAI0111"),
+MLN0661=context.csv(data).metric("MLN0661"),
+MLN0664=context.csv(data).metric("MLN0664"),
+SBK0331=context.csv(data).metric("SBK0331"),
+SPN0331=context.csv(data).metric("SPN0331"),
+SPN0661=context.csv(data).metric("SPN0661"),
+TIM0111=context.csv(data).metric("TIM0111"),
+TKA0111=context.csv(data).metric("TKA0111"),
+TKA0331=context.csv(data).metric("TKA0331"),
+TKB2201=context.csv(data).metric("TKB2201"),
+TMK0331=context.csv(data).metric("TMK0331"),
+TWZ0331=context.csv(data).metric("TWZ0331"),
+WPR0331=context.csv(data).metric("WPR0331"),
+WPR0661=context.csv(data).metric("WPR0661"),
+<!--REGION IN-->
+AVI2201=context.csv(data).metric("AVI2201"),
+BAL0331=context.csv(data).metric("BAL0331"),
+BDE0111=context.csv(data).metric("BDE0111"),
+BEN2201=context.csv(data).metric("BEN2201"),
+BEN2202=context.csv(data).metric("BEN2202"),
+BPD1101=context.csv(data).metric("BPD1101"),
+BPT1101=context.csv(data).metric("BPT1101"),
+BWK1101=context.csv(data).metric("BWK1101"),
+CML0331=context.csv(data).metric("CML0331"),
+CYD0331=context.csv(data).metric("CYD0331"),
+CYD2201=context.csv(data).metric("CYD2201"),
+EDN0331=context.csv(data).metric("EDN0331"),
+FKN0331=context.csv(data).metric("FKN0331"),
+GOR0331=context.csv(data).metric("GOR0331"),
+HWB0331=context.csv(data).metric("HWB0331"),
+HWB0332=context.csv(data).metric("HWB0332"),
+HWB2201=context.csv(data).metric("HWB2201"),
+INV0331=context.csv(data).metric("INV0331"),
+INV2201=context.csv(data).metric("INV2201"),
+INV2202=context.csv(data).metric("INV2202"),
+MAN2201=context.csv(data).metric("MAN2201"),
+NMA0331=context.csv(data).metric("NMA0331"),
+NSY0331=context.csv(data).metric("NSY0331"),
+OAM0331=context.csv(data).metric("OAM0331"),
+OHA2201=context.csv(data).metric("OHA2201"),
+OHB2201=context.csv(data).metric("OHB2201"),
+OHC2201=context.csv(data).metric("OHC2201"),
+PAL0331=context.csv(data).metric("PAL0331"),
+ROX1101=context.csv(data).metric("ROX1101"),
+ROX2201=context.csv(data).metric("ROX2201"),
+SDN0331=context.csv(data).metric("SDN0331"),
+STU0111=context.csv(data).metric("STU0111"),
+TWI2201=context.csv(data).metric("TWI2201"),
+WTK0111=context.csv(data).metric("WTK0111"),
+WTK0331=context.csv(data).metric("WTK0331"),
+WTK2201=context.csv(data).metric("WTK2201");
+
+<!--var colors = ["#203000","#306010","407020","508030","609040","70a050","80b060","90c070","a0d080","b0d090"]
+<!--var colors = ["b0d090","a0d080","90c070","80b060","70a050","609040","508030","407020","#306010","#203000"]
+var colors = ["#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff","#ADDD8E","#78C679","#41AB5D","#238443","#006837","#004529","#000000","#EF3B2C"];
+
+var h = 36;
+var extent = [0,400];
+
+<!--NORTHLAND REGION-->
+  d3.select("#visNL").call(function(div) {
+
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+
+    div.selectAll(".horizon")
+   .data([ALB0331,ALB1101,BRB0331,DAR0111,KEN0331,KOE1101,MDN1101,MDN2201,MPE0331,MTO0331,SVL0331,WEL0331])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+<!--AUCKLAND REGION-->
+  d3.select("#visAK").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([BOB0331,BOB1101,GLN0331,GLN0332,HEN0331,HEN2201,HEP0331,MER0331,MNG0331,MNG1101,OTA0221,OTA1101,OTA1102,OTA2201,OTA2202,PAK0331,PEN0221,PEN0251,PEN0331,PEN1101,ROS0221,ROS1101,SWN2201,TAK0331,WIR0331])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));
+  });
+<!--WAIKATO REGION-->
+   d3.select("#visHM").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([ARA2201,ARI1101,ARI1102,ATI2201,CBG0111,HAM0111,HAM0331,HAM0551,HAM2201,HIN0331,HLY0331,HLY2201,HTI0331,KPO1101,KPU0661,MTI2201,NAP2201,NAP2202,OKI2201,OKN0111,ONG0331,PAO1101,PPI2201,RPO2201,THI2201,TKU0331,TKU2201,TMN0551,TMU0111,TMU1101,TWH0331,WHU0331,WKM2201,WKO0331,WPA2201,WRK0331,WRK2201])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+ 
+<!--BAY OF PLENTY REGION-->
+   d3.select("#visBP").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([EDG0331,KAW0111,KAW0112,KAW0113,KAW1101,KAW2201,KIN0111,KIN0112,KIN0113,KIN0331,KMO0331,LFD1101,LFD1102,MAT1101,MAT1102,MTM0331,OHK2201,OWH0111,ROT0111,ROT0331,ROT1101,TGA0111,TGA0331,TKH0111,TMI0331,TRK0111,TRK2201,WAI0111])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+
+<!--HAWKES BAY REGION-->
+   d3.select("#visNR").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([DVK0111,FHL0331,GIS0501,GYT0331,MGM0331,MST0331,RDF0331,RDF2201,TUI0111,TUI1101,WDV0111,WDV1101,WHI0111,WHI2201,WPW0331,WRA0111,WTU0331])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+<!--TARANAKI/PALMERSTON NORTH REGION->
+   d3.select("#visPN").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([BPE0331,BPE0551,BPE2201,BRK0331,CST0331,HUI0331,HWA0331,HWA0332,HWA1101,HWA1102,KPA1101,LTN0331,MHO0331,MKE1101,MNI0111,MTN0331,MTR0331,NPL0331,NPL1101,NPL2201,OPK0331,SFD0331,SFD2201,TNG0111,TNG0551,TWC2201,WGN0331,WVY0111])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+<!--LOWER NORTH ISLAND/WELLINGTON REGION->
+   d3.select("#visWN").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([CPK0111,CPK0331,GFD0331,HAY0111,HAY0331,HAY1101,HAY2201,KWA0111,MLG0111,MLG0331,PNI0331,PRM0331,TKR0331,UHT0331,WIL0331,WWD1102,WWD1103])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+<!--UPPER SOUTH ISLAND/WESTCOAST REGION-->
+   d3.select("#visWC").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([APS0111,ARG1101,ATU1101,BLN0331,CLH0111,COB0661,COL0111,COL0661,DOB0331,DOB0661,GYM0661,HKK0661,HOR0331,HOR0661,KIK0111,KUM0661,MCH0111,MOT0111,MPI0661,ORO1101,ORO1102,OTI0111,RFN1101,RFN1102,STK0331,STK2201,WPT0111])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+<!--CHRISTCHURCH REGION->
+   d3.select("#visCH").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([ABY0111,ADD0111,ADD0661,ASB0331,ASB0661,ASY0111,BRY0111,BRY0661,CUL0331,CUL0661,ISL0331,ISL0661,ISL2201,KAI0111,MLN0661,MLN0664,SBK0331,SPN0331,SPN0661,TIM0111,TKA0111,TKA0331,TKB2201,TMK0331,TWZ0331,WPR0331,WPR0661])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+<!--LOWER SOUTH ISLAND->
+   d3.select("#visIN").call(function(div) {
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("top"));
+    div.selectAll(".horizon")
+   .data([AVI2201,BAL0331,BDE0111,BEN2201,BEN2202,BPD1101,BPT1101,BWK1101,CML0331,CYD0331,CYD2201,EDN0331,FKN0331,GOR0331,HWB0331,HWB0332,HWB2201,INV0331,INV2201,INV2202,MAN2201,NMA0331,NSY0331,OAM0331,OHA2201,OHB2201,OHC2201,PAL0331,ROX1101,ROX2201,SDN0331,STU0111,TWI2201,WTK0111,WTK0331,WTK2201])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(context.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(context.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(context.axis().orient("bottom"));  
+  });
+
+ 
+    context.on("focus", function(i) {
+         d3.selectAll(".value").style("right", i == null ? null : context.size() - i + "px");
+}); 
+  context.on("change", function(start, stop) {
+    d3.select("#update-time").text("Last updated at " + stop + ".");
+});
+});
+</script>
+
+
+<!-- Google Analytics 
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-27206978-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+-->
+</p></body></html>
