@@ -1,13 +1,34 @@
-This software monitors and stores the real-time (5 minute) dispatch prices, at every GXP, and every five minutes.
+This software automatically monitors and stores the real-time (ex-post 5 minute) dispatch prices, at every GXP/GIP in the
+New Zealand Electricity Market.  
 
-Initial implementations of this software utilising loops in a single python process eventually failed, for one of many reasons, and required restarting, which was hopeless.
-To over-come this a linux box has been set up and the operating system (CRON) used to poll the NZX WITS FTP servive every 5 minutes.
+The script does the following:
+    1. Connects to the NZX WITS FTP server with login details
+    2. Determines the most likely name of the csv file that contains the most recent (with lag) prices.  The reason for 
+       doing this is to reduce the amount of FTP traffic on the WITS FTP server.  Some of the directories contail many
+       files and a simple dir listing can take considerable bandwidth (and time).  
+    3. Once the filename is guessed, it attempts to download the csv file.  If it fails, several other guesses are made
+       (note: this could probably be improved) and if all guesses fail, then we have a gap in the data.  
+    4. There is a lag (which can be set manually).  Currently, the delay is around 10 to 15 minutes.
+    5. Once obtained, the csv file is parsed into memory from where it is directly loaded into a pandas dataframe and 
+       added to the huge and growing live5.h5 hdf5 database file.  Various statistics are calculated and logged (easy 
+       with pandas) and a weekly csv file (all_week.csv) saved that contains five minute price data for all gxps over a 
+       rolling week.
+    
+
+Initial implementations of this code utilized loops in a single python process and would eventually fail (for one of many 
+reasons).  To overcome this a linux box (running Ubuntu 12.04 LTS) was set up and the operating system (CRON) used to 
+run the python script on a five minute basis.   
 
 This is currently achieved (as at 23 January 2013) with a linux box running Ubuntu 12.04 LTS
 
 The crontab line looks like this:
 */5 * * * * /usr/bin/python /home/dave/python/wits_ftp/wits_ftp_opsys.py 
            --ftp_pass='password' --ftp_user='user' >> /home/dave/python/wits_ftp/wits_ftp_cron.log 2>&1
+
+To monitor prices, all_prices.html, is used with a simple webserver.  This uses the awesome d3 javascript library and in
+particular implements horizon charts (using cubism) over the week for each gxp.  Some of this could be improved in the 
+future as currently the whole all_week.csv file is read every 5 minutes, where we should be able to set up a weekly data
+base and just update the most recent values: -> todo.
 
 23 January 2013 - now tracking this software using the GIT and GITHUB.
 
