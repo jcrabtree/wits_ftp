@@ -9,7 +9,7 @@ This is free software, and you are welcome to redistribute it under certain cond
 
 Intro:
 
-This software automatically monitors and stores the real-time (ex-post 5 minute) dispatch prices, at every GXP/GIP in the
+This software automatically monitors and stores the real-time (ex-post 5 minute) market prices, at every GXP/GIP in the
 New Zealand Electricity Market.  
 
 The script does the following:
