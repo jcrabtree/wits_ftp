@@ -5,32 +5,38 @@ This is part of the spot price alert system implemented by the New Zealand Elect
 This originated from a simple "matlab like" script (spot_price_ftp_v0.4.py) but is now more functionized using a class and 
 various function definitions in Python. 
 
-Overall, there are two independent parts to the spot price alert system.  Both run as separate processes, but linked through a shared file, live5.h5
+Overall, there are two independent parts to the spot price alert system.  Both run as separate processes, 
+but linked through a shared file, live5.h5
 
-Process 1. This part, an FTP client, connects, determines what file to download, downloads the file (to memory), processes the file and saves this file containing:
+Process 1. This part, an FTP client, connects, determines what file to download, downloads the file (to memory), 
+processes the file and saves this file containing:
  1. the 5 minute prices for the previous 5 minutes live5[live5], and,
  2. a rolling half-hourly 
-Process 2. A price_stats_alert.py script that calculates various statistics on the five minute data and, if alert conditions are met, alerts people through the MyMailer class. 
+Process 2. A price_stats_alert.py script that calculates various statistics on the five minute data and, if alert 
+conditions are met, alerts people through the MyMailer class. 
 
 This script makes heavy use of the Wes McKinney's amazing Pandas module (thanks Wes!) 
 
 Used with the following crontab
 
-*/5 * * * * /usr/bin/python /home/dave/python/wits_ftp_op_sys/wits_ftp_opsys.py >> /home/dave/python/wits_ftp_op_sys/wits_ftp_op_sys_cron.log 2>&1
+*/5 * * * * /usr/bin/python /home/dave/python/wits_ftp/wits_ftp_opsys.py 
+    --ftp_pass='password' --ftp_user='user' >> /home/dave/python/wits_ftp/wits_ftp_cron.log 2>&1
 
-Now tracking this project directory with GIT (10/8/2012) -> still learning this....
+Now tracking this project directory with GIT (10/8/2012) 
 
-TO DO: Upgrade HDFStore storage routines, much recent work on pandas has impoved this no end, but I'm not using this well at all - needs sorting
-       adding command line parsing
-       General update - ultimately storage as integers would be nice - there are problems though, including how the GXP data can change, etc.
+TO DO: Upgrade HDFStore storage routines, much recent work on pandas has impoved this no end, but I'm not using this 
+       well at all - needs sorting
+       General update - ultimately storage as integers would be nice - there are problems though, including how the GXP
+       data can change, etc.
        
        
-**ISSUES**
-**Between December 5 and December 19, 2012, this script stopped outputing prices, reason was lack of a published infeasibility file -- fixed December 19, 2012**
-**NOTE: In development, on some systems (i.e., within a restricted coporate environment like the EA) an HTTP tunnel is required due to combination
-of proxy issues/settings and the python FTPlib module.
-**proxy host required for the ftp instance, via an HTTP tunnel, i.e., it maps sockets...the ECOM proxy servers (ecommrtisa01 and/or earnie) appear to disallow FTP transfer.  
- 
+**KNOWN ISSUES**
+**Between December 5 and December 19, 2012, this script stopped outputing prices, reason was lack of a published 
+infeasibility file -- fixed December 19, 2012**
+**NOTE: In development, on some systems (i.e., within a restricted coporate environment like the EA) an HTTP tunnel is 
+required due to combination of proxy issues/settings and the python FTPlib module.
+**proxy host required for the ftp instance, via an HTTP tunnel, i.e., socket mapping...At the EA the ECOM proxy servers 
+appear to disallow FTP transfer.  
 
 David Hume, 23/01/2013.
 
