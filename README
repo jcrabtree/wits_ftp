@@ -15,9 +15,9 @@ New Zealand Electricity Market.
 The script does the following:
 
     1. Connects to the NZX WITS FTP server with login details
-    2. Determines the most likely name of the csv file that contains the most recent (with lag) prices.  The reason for 
-       doing this is to reduce the amount of FTP traffic on the WITS FTP server.  Some of the directories contail many
-       files and a simple dir listing can take considerable bandwidth (and time).  
+    2. Determines the most likely name of the csv file that contains the most recent (with lag) prices.  This reduces the
+       amount of FTP traffic on the WITS FTP server.  Some of the directories contail many files and a simple dir listing
+       can take considerable bandwidth (and time).  
     3. Once the filename is guessed, it attempts to download the csv file.  If it fails, several other guesses are made
        (note: this could probably be improved) and if all guesses fail, then we have a gap in the data.  
     4. There is a lag (which can be set manually).  Currently, the delay is around 10 to 15 minutes.
@@ -41,6 +41,8 @@ To monitor prices, all_prices.html, is used with a simple webserver.  This uses 
 particular implements horizon charts (using cubism) over the week for each gxp.  Some of this could be improved in the 
 future as currently the whole all_week.csv file is read every 5 minutes, where we should be able to set up a weekly data
 base and just update the most recent values: -> todo.
+
+ToDo: Lots of possible options, implement twitter feed for example.
 
 23 January 2013 - now tracking this software using the GIT and GITHUB.
 
