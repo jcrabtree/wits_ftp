@@ -1,12 +1,13 @@
+=========================================================================================================================
 wits_ftp - automatic monitoring of New Zealand electricity prices
+=========================================================================================================================
+
 Copyright (C) 2013 David Hume, Electricty Authority, New Zealand.
 
-    This program comes with ABSOLUTELY NO WARRANTY; for details see LICENSE file.
-    This is free software, and you are welcome to redistribute it under certain conditions; for details see LICENSE file.
+This program comes with ABSOLUTELY NO WARRANTY; for details see LICENSE file.
+This is free software, and you are welcome to redistribute it under certain conditions; for details see LICENSE file.
 
-=========================================================================================================================
-wits_ftp - automatic monitoring of New Zealand electricity prices
-=========================================================================================================================
+Intro:
 
 This software automatically monitors and stores the real-time (ex-post 5 minute) dispatch prices, at every GXP/GIP in the
 New Zealand Electricity Market.  
