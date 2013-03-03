@@ -394,12 +394,16 @@ class wits_ftp():
         
         i5w_hr = self.crop_data(self.i5w,7,0)
         r5w_hr = self.crop_data(self.r5w,7,0)
-        l5w_hr = self.crop_data(self.l5w,7,0)
+        l5w_hr = self.crop_data(self.l5w,7,0) #.T.asfreq('5Min')
         statsw_hr = self.crop_data(self.statsw,0,24)
         #Dump to csv in an attemp to use javascript d3 to read and display (in a nice format) the csv data
-        ((i5w_hr.T)/100.0).to_csv(self.wits_path + 'island_week.csv',float_format='%.2f') 
-        ((r5w_hr.T)/100.0).to_csv(self.wits_path + 'region_week.csv',float_format='%.2f')
-        ((l5w_hr.T)/100.0).to_csv(self.wits_path + 'all_week.csv',float_format='%.2f')
+        i5w_d3 = ((i5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') #get rid of multi-index (Trading Periods), resample at 5min intervals, and fill NANs with zeros.
+        r5w_d3 = ((r5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
+        l5w_d3 = ((l5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
+        
+        i5w_d3.to_csv(self.wits_path + 'island_week.csv',float_format='%.2f') 
+        r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.2f')
+        l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.2f')
         statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.2f')
             
     #############################################################################################################################################################################                                    
