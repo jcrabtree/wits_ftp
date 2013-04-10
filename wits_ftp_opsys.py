@@ -418,10 +418,10 @@ class wits_ftp():
         r5w_d3 = ((r5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
         l5w_d3 = ((l5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
         
-        i5w_d3.to_csv(self.wits_path + 'island_week.csv',float_format='%.2f') 
-        r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.2f')
-        l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.2f')
-        statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.2f')
+        i5w_d3.to_csv(self.wits_path + 'island_week.csv',float_format='%.4f') 
+        r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.4f')
+        l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.4f')
+        statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f')
             
     #############################################################################################################################################################################                                    
     def save_dataframes(self):
