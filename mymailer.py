@@ -17,11 +17,7 @@ David Hume, 13/05/2013
 
 TODO:
 
-This script needs work.  We want to be able to make this publicly available on github.
-To do this we need to have an address book input file, rather than hard coded.
-We also need command line inputs for the server,sender and sms domain.
 It would be nice to have a testing mode: adds TESTING to msg header, reduces trigger level to $0/MWh
-
 Weelky price text/email could be useful...
  
 '''
