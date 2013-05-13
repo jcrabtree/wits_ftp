@@ -326,6 +326,7 @@ class wits_ftp():
                 self.dto = datetime(int(self.l5.date[0].split('/')[2]),int(self.l5.date[0].split('/')[1]),int(self.l5.date[0].split('/')[0]),int(self.l5.time[0].split(':')[0]),int(self.l5.time[0].split(':')[1])) #yes, the date/time object of this file, read from the first row.
                 self.TP = self.l5.TP[0]  #get the current trading period
                 self.l5 = self.l5.drop(['date', 'TP' , 'time' , 'price_type' , 'file_write'], axis=1) #we have the datetime, delete all the extra crap that wastes space.
+                self.l5 = self.l5[(self.l5<self.lmt)*(self.l5>-self.lmt)] #removes any row over or under the self.lmt (Note: could be smarter here are then add those removes to the inf.index obj and record - perhaps somehting for the future
               
                 self.r5 = self.l5.groupby('region').mean().price #r5 is the regional mean price series
                 self.r5 = self.r5.T             #transpose, and, 
@@ -337,7 +338,6 @@ class wits_ftp():
                 self.l5 = self.l5.pop('price')  #remove the extra island and region columns and pop only the price to a series, as this is all we require.
                 self.l5 = self.l5.T             #transpose, and, 
                 self.l5.name = self.dto         #rename
-                self.l5 = self.l5[(self.l5<self.lmt)*(self.l5>-self.lmt)] #removes any row over or under the self.lmt (Note: could be smarter here are then add those removes to the inf.index obj and record - perhaps somehting for the future
 
                 #Now we need to store the live5 data in a dataframe, based on the above dto name tags.
                 #Too complicate things, we need a multi-index with trading periods on the column indexing (and possible hours in the future).  For now we attempt a multiindex with the dto and TP from above.
