@@ -422,6 +422,23 @@ class wits_ftp():
         r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.4f')
         l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.4f')
         statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f')
+           
+        #Lets also groupby Trading periods and dump that to csv for the text alert system in mymailer.py
+        all_week = read_csv(self.wits_path + 'all_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
+        all_week['Date']=all_week.index.map(lambda x: x[0].date())
+        all_week_bytp = all_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        all_week_bytp.to_csv(self.wits_path + 'all_week_bytp.csv')
+        
+        island_week = read_csv(self.wits_path + 'island_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
+        island_week['Date']=island_week.index.map(lambda x: x[0].date())
+        island_week_bytp = island_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        island_week_bytp.to_csv(self.wits_path + 'island_week_bytp.csv')
+        
+        region_week = read_csv(self.wits_path + 'region_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
+        region_week['Date']=region_week.index.map(lambda x: x[0].date())
+        region_week_bytp = region_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        region_week_bytp.to_csv(self.wits_path + 'region_week_bytp.csv')
+
             
     #############################################################################################################################################################################                                    
     def save_dataframes(self):
@@ -432,7 +449,6 @@ class wits_ftp():
         live5['r5w'] = self.r5w
         live5['i5w'] = self.i5w
         live5['statsw'] = self.statsw
-
         live5.close()
 
     #############################################################################################################################################################################                            
