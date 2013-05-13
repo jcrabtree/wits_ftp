@@ -83,12 +83,9 @@ logger.setLevel(logging.INFO)
 #Exception class pass...
 #############################################################################################################################################################################        
 
-
 class ConnectionError(Exception): pass
 class SendError(Exception): pass
 class OpenHDFFileError(Exception): pass
-
-
 class MyMailer():
     """This class is used to test spot market prices and react to high prices by sending an email to a text alert system"""    
     def __init__(self,host,sender,path,GXP_trigger,Island_trigger,phonebook):
@@ -110,50 +107,6 @@ class MyMailer():
         self.i = 0
         self.most_recent_alert = datetime(1999,1,1,1,1)
  
-    def get_receivers(self):
-        pb=open(self.path + self.phonebook)
-        for l in pb:
-            if l[0] != '#':
-                self.receivers.append(l.split(',')[1].replace('\n',''))
-        
-    def connect(self):
-        try:
-            self.server = smtplib.SMTP(self.host)
-            
-        except smtplib.socket.gaierror:
-            error_text = "Error connecting to %s" % (self.host)
-            logger.error(error_text)
-            ConnectionError(error_text)
-            
-    def send_text(self):
-        self.get_receivers()
-        try:
-            self.server.set_debuglevel(False) 
-            self.server.sendmail(self.sender,self.receivers, self.msg.as_string())
-        except smtplib.SMTPException, errormsg:
-            error_text = "Couldn't send message: %s" % (errormsg)
-            logger.error(error_text)
-            SendError(error_text)
-            
-        except smtplib.socket.timeout:
-            error_text = "Socket error while sending message"
-            logger.error(error_text)
-            ConnectionError(error_text)
-            
-    def send_alert_text(self):
-        self.connect()
-        self.msg = MIMEText(self.price_stats + ' '*140)         #Format msg string and add subject
-        self.msg['Subject'] = '*Real-time price alert*'
-        self.send_text()
-        self.quit()
-        
-    def send_error_text(self):
-        msg_text = 'Spot price alert has fallen over - needs restart...!'         #Format msg string and add subject
-        sub_text = 'Spot price alert process has stopped!'
-        msg = MIMEText(msg_text)
-        msg['Subject'] = sub_text
-        self.send_text(receivers,msg)
-       
     def get_prices(self):
         try:
             all_week_bytp=read_csv(self.path + 'all_week_bytp.csv',index_col=0,parse_dates=True).reset_index().set_index(['Date','TP'])
@@ -163,15 +116,11 @@ class MyMailer():
             self.i5w = island_week_bytp.ix[-2:-1,:].T
             self.r5w = region_week_bytp.ix[-2:-1,:].T
         except:
-            error_text = "Could not load live5.h5"
+            error_text = "Could not load one or more of the following: all_week_by_tp.csv, region_week_bytp.csv or island_week_bytp.csv"
             logger.error(error_text)
             OpenHDFFileError(error_text)
 
-
-    #############################################################################################################################################################################            
-    def report_prices(self):    #Ok, report current prices, this seems way too long, and quite yuck really - sure this can be imporved in the future
-    #############################################################################################################################################################################                    
-
+    def report_prices(self):    #Report current prices
         self.m5_mean = self.l5w.mean().values[0]        #Mean price over all GXPs for the peroid
         self.m5_max = {self.l5w.idxmax().values[0]:(self.l5w.max().values[0])}
         self.m5_min = {self.l5w.idxmin().values[0]:(self.l5w.min().values[0])}
@@ -189,6 +138,44 @@ class MyMailer():
                                                       self.l5w.idxmax(axis=0).index[0][1],\
                                                       (datetime(2013,1,1)+timedelta(seconds=60*30*self.l5w.idxmax(axis=0).index[0][1])).time().isoformat()[:-3]   )              
         logger.info(self.price_stats)
+ 
+    def send_alert_text(self):
+        self.connect()
+        self.msg = MIMEText(self.price_stats + ' '*140)         #Format msg string and add subject
+        self.msg['Subject'] = '*Real-time price alert*'
+        self.send_text()
+        self.quit()
+
+    def connect(self):
+        try:
+            self.server = smtplib.SMTP(self.host)
+            
+        except smtplib.socket.gaierror:
+            error_text = "Error connecting to %s" % (self.host)
+            logger.error(error_text)
+            ConnectionError(error_text)
+
+    def send_text(self):
+        self.get_receivers()
+        try:
+            self.server.set_debuglevel(False) 
+            self.server.sendmail(self.sender,self.receivers, self.msg.as_string())
+        except smtplib.SMTPException, errormsg:
+            error_text = "Couldn't send message: %s" % (errormsg)
+            logger.error(error_text)
+            SendError(error_text)
+            
+        except smtplib.socket.timeout:
+            error_text = "Socket error while sending message"
+            logger.error(error_text)
+            ConnectionError(error_text)
+
+    def get_receivers(self):
+        pb=open(self.path + self.phonebook)
+        for l in pb:
+            if l[0] != '#':
+                self.receivers.append(l.split(',')[1].replace('\n',''))
+       
     def quit(self):
         self.server.quit()
 
