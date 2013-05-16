@@ -83,8 +83,8 @@ parser.add_argument('--ftp_user', action="store",dest='ftp_user',default='ecom')
 parser.add_argument('--ftp_pass', action="store",dest='ftp_pass')
 
 parser.add_argument('--wits_path', action="store",dest='wits_path',default='/home/dave/python/wits_ftp/')
-parser.add_argument('--proxy_host', action="store",dest='proxy_host',default='172.29.52.107') #use earnie as of 22/8/2012. Use 127.0.0.1 when using cntlm on workstation...
-parser.add_argument('--proxy_port', action="store",dest='proxy_port',default='8080') #use earnie as of 22/8/2012. Use 3128 when using cntlm on workstation...
+parser.add_argument('--proxy_host', action="store",dest='proxy_host',default='172.29.52.79') #use earnie as of 22/8/2012. Use 127.0.0.1 when using cntlm on workstation...
+parser.add_argument('--proxy_port', action="store",dest='proxy_port',default='8081') #use earnie as of 22/8/2012. Use 3128 when using cntlm on workstation...
 cmd_line = parser.parse_args()
 
 #############################################################################################################################################################################        
@@ -319,6 +319,7 @@ class wits_ftp():
             if isnull(self.f['p']) == False:
                 buf = StringIO.StringIO(self.f['p'])   #ok, this is a string buffer straight from the ftp
                 self.l5 = read_csv(buf, names = self.colnames['p'])   #read in the new live 5 data 
+
                 if self.f['i']:
                     if isnull(self.f['i']) == False:
                        self.l5 = self.l5.drop(self.inf.index) #now remove GXPs that are included in the infesibility file
@@ -326,9 +327,12 @@ class wits_ftp():
                 self.dto = datetime(int(self.l5.date[0].split('/')[2]),int(self.l5.date[0].split('/')[1]),int(self.l5.date[0].split('/')[0]),int(self.l5.time[0].split(':')[0]),int(self.l5.time[0].split(':')[1])) #yes, the date/time object of this file, read from the first row.
                 self.TP = self.l5.TP[0]  #get the current trading period
                 self.l5 = self.l5.drop(['date', 'TP' , 'time' , 'price_type' , 'file_write'], axis=1) #we have the datetime, delete all the extra crap that wastes space.
-                self.l5 = self.l5[(self.l5<self.lmt)*(self.l5>-self.lmt)] #removes any row over or under the self.lmt (Note: could be smarter here are then add those removes to the inf.index obj and record - perhaps somehting for the future
-              
+                self.l5 = self.l5.ix[((self.l5<self.lmt)*(self.l5>-self.lmt)).price,:] #removes any row over or under the self.lmt (Note: could be smarter here are then add those removes to the inf.index obj and record - perhaps somehting for the future
+                #print self.l5
+                #self.l5.price = self.l5.price[(self.l5<self.lmt)*(self.l5>-self.lmt)] #removes any row over or under the self.lmt (Note: could be smarter here are then add those removes to the inf.index obj and record - perhaps somehting for the future
+                
                 self.r5 = self.l5.groupby('region').mean().price #r5 is the regional mean price series
+                
                 self.r5 = self.r5.T             #transpose, and, 
                 self.r5.name = self.dto         #rename region series with the datetimeobject (dto)
 
