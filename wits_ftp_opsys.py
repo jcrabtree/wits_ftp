@@ -319,7 +319,7 @@ class wits_ftp():
             if isnull(self.f['p']) == False:
                 buf = StringIO.StringIO(self.f['p'])   #ok, this is a string buffer straight from the ftp
                 self.l5 = read_csv(buf, names = self.colnames['p'])   #read in the new live 5 data 
-
+            
                 if self.f['i']:
                     if isnull(self.f['i']) == False:
                        self.l5 = self.l5.drop(self.inf.index) #now remove GXPs that are included in the infesibility file
@@ -426,7 +426,12 @@ class wits_ftp():
         r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.4f')
         l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.4f')
         statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f')
-           
+        
+        #Dump just the current prices
+        current_prices = DataFrame({'price':self.l5})
+        current_prices = current_prices.reset_index().rename(columns={'index':'id'}).set_index('id').dropna()
+        current_prices.to_csv(self.wits_path + 'price.csv',float_format='%.2f') 
+        #self.l5.to_csv(self.wits_path + 'price_l5.csv',float_format='%.2f')
         #Lets also groupby Trading periods and dump that to csv for the text alert system in mymailer.py
         all_week = read_csv(self.wits_path + 'all_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
         all_week['Date']=all_week.index.map(lambda x: x[0].date())
