@@ -227,7 +227,7 @@ class wits_ftp():
             log_time = time.time()
             #info_text = 'Connected to %s after %2.3f seconds, logged in after %2.3f seconds' % (self.ftp_host,connect_time2 - self.connect_time,log_time-connect_time2)
             info_text = 'Connected to %s' % self.ftp_host
-            #logger.info(info_text)
+            logger.info(info_text)
         except ftplib.error_perm:
             error_txt = 'ERROR: Unable to login'
             logger.error(error_txt.center(125,'*'))
@@ -242,6 +242,7 @@ class wits_ftp():
         end_ext = '.csv.gz'
         for end_digit in self.end_digs[p_or_i]:
             filename = filename_start + end_digit + end_ext
+            print filename
             try: 
                 self.ftp.retrbinary('RETR ' + filename, five_min_data.write) 
                 break
@@ -370,17 +371,20 @@ class wits_ftp():
         self.live5exists = False
         for f in os.listdir(self.wits_path):
             if f == 'live5.h5':
+                #print "Live 5 exists!"
                 self.live5exists = True
 
         if self.live5exists == True:  #If it is, then, check the current data is not already in the dataframe (required for testing when we are stop-starting script faster than every 5 mins.)
            if list(self.mult_idx)[0] not in list(self.l5w.columns):   
+              print "updating weekly data frames"
               self.l5w = self.l5w.join(DataFrame(self.l5, columns=self.mult_idx))  #Update the weekly data frames: l5w,r5w and i5w
               self.r5w = self.r5w.join(DataFrame(self.r5, columns=self.mult_idx))
               self.i5w = self.i5w.join(DataFrame(self.i5, columns=self.mult_idx))
               self.r5w = self.r5w.reindex_axis(['AK','HM','BP','NL','NR','PN','WN','CH','WC','IN'], axis=0)
+              #print self.l5w
               #Do a stats dataframe
               self.statsw = self.statsw.join(DataFrame(self.stats, columns=self.mult_idx))
-
+              
         else:
            self.l5w = DataFrame(self.l5, columns=self.mult_idx)   #create new DataFrame if on first iteration  
            self.r5w = DataFrame(self.r5, columns=self.mult_idx)   #create new DataFrame if on first iteration  
@@ -470,7 +474,7 @@ class wits_ftp():
         if self.ftp_error == False:  #i.e., if we got data then process it
            self.ftp_get_v2('p')             #try and get price
            self.ftp_get_v2('i')
-      
+     
         self.ftp_quit()
         #Place into DataFrames and do the stats, etc...
         self.ftp_pandas()                #Ok, so we have the data, now process to pandas object
@@ -506,13 +510,13 @@ class wits_ftp():
     #############################################################################################################################################################################                            
     def report_prices(self):
     #############################################################################################################################################################################                            
-        try:
+        #try:
             self.msg_text = self.l5w.T[-1:].T.idxmax()[0] + '=$' + str(self.l5w.T[-1:].T.max()[0]) + '/MWh' #,@' + str(self.l5w.T.index[-1][0])[:-3]
             self.sub_text = 'Price alert @ ' + str(self.l5w.columns[-1][0])
-        except:
-            error_text = "Unable to form string - Bad data"
-            logger.error(error_text)
-            TryFormString(error_text)
+        #except:
+        #    error_text = "Unable to form string - Bad data"
+        #    logger.error(error_text)
+        #    TryFormString(error_text)
 
 #############################################################################################################################################################################                            
 #Start the programme
