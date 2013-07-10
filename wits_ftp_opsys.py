@@ -222,24 +222,17 @@ class wits_ftp():
     #############################################################################################################################################################################        
         try:
             self.connect_time = time.time()
-            #raise RuntimeError('This is a test raise for an error while attempting to connect to the FTP server')
             self.ftp = ftplib.FTP(self.ftp_host, timeout=self.ftp_timeout)
-            
             connect_time2 = time.time()
             self.ftp_error = False
-          
         except (sup.socket.error, sup.socket.gaierror), e:
             error_txt = 'ERROR: Unable to reach %s' % self.ftp_host
             logger.error(error_txt.center(125,'*'))
             ConnectionError(error_txt.center(125,'*'))
             self.ftp_error = True
-        #Login
-        try:
+        try:        #Login
             self.ftp.login(self.ftp_user,self.ftp_pass)
             log_time = time.time()
-            #info_text = 'Connected to %s after %2.3f seconds, logged in after %2.3f seconds' % (self.ftp_host,connect_time2 - self.connect_time,log_time-connect_time2)
-            #info_text = 'Connected to %s' % self.ftp_host
-            #logger.info(info_text)
         except ftplib.error_perm:
             error_txt = 'ERROR: Unable to login'
             logger.error(error_txt.center(125,'*'))
@@ -254,7 +247,6 @@ class wits_ftp():
         end_ext = self.end_ext[pis]
         for end_digit in self.end_digs[pis]:
             filename = filename_start + end_digit + end_ext
-            #print filename
             try: 
                 self.ftp.retrbinary('RETR ' + filename, five_min_data.write) 
                 break
@@ -263,8 +255,6 @@ class wits_ftp():
                     error_text = 'Name not %s' % filename
                     WITSFileNameGuessError(error_text.center(msg_len,'*'))
                     self.ftp_error = True
-
-                    #logger.error(error_text.center(125,'*'))           #there are too many to log as they occur most 5 minute periods
             except:  #We may, from time-to-time, get other errors, this is trying to pass these errors
                 #If the FTP is broken we need to flag this and make sure that we don't call ftp_quit
                 error_text = 'An error occurred in retrieving file %s' % (filename)
@@ -308,7 +298,6 @@ class wits_ftp():
             
     #############################################################################################################################################################################        
     def ftp_quit(self):       #Quit FTP server
-
     #############################################################################################################################################################################        
         if self.ftp_error == False:  #i.e., if there was an issue, don't quit as likely we lost the FTP pipe|link
             q = self.ftp.quit()
@@ -316,7 +305,6 @@ class wits_ftp():
     #############################################################################################################################################################################            
     def ftp_pandas(self):   #combine 5 minute prices into one pandas dataframe object - this needs work, multi-index and groupby shoiuld be impliemnted here...
     #############################################################################################################################################################################                    
-        
         self.inf = None
         self.l5 = None
         self.i5 = None
@@ -357,8 +345,6 @@ class wits_ftp():
                 self.last_r5_data = self.r5
                 self.last_i5_data = self.i5
                 self.last_stats_data = self.stats
-                self.update_dataframes()
-                self.update_prices()
 
         if self.f['s']: #if summary data exists
             if isnull(self.f['p']) == False:
@@ -366,9 +352,7 @@ class wits_ftp():
                 self.s5 = read_csv(buf, names = self.colnames['s'])   #read in the new live 5 data 
                 self.s5 = self.s5.reset_index().T.pop(0)  #reset index and convert to series 
                 self.s5 = self.s5.drop(['level_0', 'level_1' , 'level_2' , 'Datetime']) #remove extra buff
-                self.s5.name = self.dto  #and stamp with the dto
-        self.save_dataframes()             #save the dataframes
-    
+                self.s5.name = self.dto  #and stamp with the dto   
     
     #############################################################################################################################################################################                            
     def update_df(self,cropped_pickle_file,current_series,current_index,crop_days,crop_hours):          #Update function for cropped dataframes
@@ -378,72 +362,38 @@ class wits_ftp():
             cropped_df = read_pickle(cropped_pickle_file) #read the file
             if list(current_index)[0] not in list(cropped_df.columns): #make sure current index not already in dataframe (when in 1 minute testing mode)		
                 cropped_df = cropped_df.join(DataFrame(current_series, columns=current_index))  #join current 5 minute series to cropped dataframe
-                cropped_df = self.crop_data(cropped_df,crop_days,crop_hours) #keep dataframe cropped by crop_days + crop_hours 
+                cropped_df = self.crop_data(cropped_df,crop_days,crop_hours) #keep dataframe cropped by crop_days + crop_hours
                 cropped_df.to_pickle(cropped_pickle_file)    #save the cropped file
-                
-
+            return cropped_df
         else:
             cropped_df = DataFrame(current_series, columns=current_index)   #create new DataFrame if on first iteration 
             cropped_df.to_pickle(cropped_pickle_file)                       #and save
-             
- 
-    #############################################################################################################################################################################                            
-    def update_dataframes(self): 
-    #############################################################################################################################################################################                            
-
-        #First test that live5.h5 is in exsistance
-        self.live5exists = False
-        for f in os.listdir(self.wits_path):
-            if f == 'live5.h5':
-                self.live5exists = True
-
-        if self.live5exists == True:  #If it is, then, check the current data is not already in the dataframe (required for testing when we are stop-starting script faster than every 5 mins.)
-           if list(self.mult_idx)[0] not in list(self.l5w.columns):   
-              self.l5w = self.l5w.join(DataFrame(self.l5, columns=self.mult_idx))  #Update the weekly data frames: l5w,r5w, i5w and summary data
-              self.r5w = self.r5w.join(DataFrame(self.r5, columns=self.mult_idx))
-              self.i5w = self.i5w.join(DataFrame(self.i5, columns=self.mult_idx))
-              self.s5w = self.s5w.join(DataFrame(self.s5, columns=self.mult_idx))
-              self.r5w = self.r5w.reindex_axis(['AK','HM','BP','NL','NR','PN','WN','CH','WC','IN'], axis=0)
-              self.statsw = self.statsw.join(DataFrame(self.stats, columns=self.mult_idx))               #Do a stats dataframe
-        else:
-           self.l5w = DataFrame(self.l5, columns=self.mult_idx)   #create new DataFrame if on first iteration  
-           self.r5w = DataFrame(self.r5, columns=self.mult_idx)   #create new DataFrame if on first iteration  
-           self.i5w = DataFrame(self.i5, columns=self.mult_idx)   #create new DataFrame if on first iteration  
-           self.s5w = DataFrame(self.s5, columns=self.mult_idx)   #create new DataFrame if on first iteration  
-           self.statsw = DataFrame(self.stats, columns=self.mult_idx)   #create new DataFrame if on first iteration            
-           self.r5w = self.r5w.reindex_axis(['AK','HM','BP','NL','NR','PN','WN','CH','WC','IN'], axis=0)
-      
-
-      
+            return cropped_df  
       
     #############################################################################################################################################################################            
     def update_prices(self):    #Ok, report current prices, this seems way too long, and quite yuck really - sure this can be imporved in the future
     #############################################################################################################################################################################                    
-        #Do some stats, mean, max, std, skew and kurtosis and add to dataframe object
-        m5_mean = (self.l5w.mean()[-1])        #Mean price over all GXPs for the peroid
+        
+        m5_mean = (self.l5w.mean()[-1])        #Mean price over all GXPs for the peroid, do some stats, mean, max, std, skew and kurtosis and add to dataframe object
         m5_max = {self.l5w.idxmax()[-1]:(self.l5w.max()[-1])}
         m5_min = {self.l5w.idxmin()[-1]:(self.l5w.min()[-1])}
         m5_std = (self.l5w.std()[-1])
         m5_skew = (self.l5w.skew()[-1])        
         m5_kurt = (self.l5w.kurt()[-1])
-        #Do regional/island info
-        dgs = 10
+        dgs = 10           #Do regional/island info
         self.nregion_txt = self.i5w[self.i5w.columns[-1]].to_string(float_format = lambda x: '$%.2f' % x).replace(' ','').replace('\n','|') + '|' + self.r5w[self.r5w.columns[-1]].to_string(float_format = lambda x: '$%.2f' % x).replace(' ','').replace('\n','|')
-
         #Format up a string for aleat purposes that gives max info. limit 160 characters...
         str_tup_m5 = (str('$%.2f' % m5_max.values()[0]).rjust(dgs,' '),m5_max.keys()[0],str('$%.2f' % m5_mean).center(dgs,' '),m5_min.keys()[0],str('$%.2f' % m5_min.values()[0]).ljust(dgs,' '),u"\u03C3" + '=' + str('%.1f' % m5_std).rjust(6,' '),'S=' + str('%.2f' % m5_skew).rjust(6,' '),'K=' + str('%.2f' % m5_kurt).rjust(6,' '))
         self.m5 = '%s@%s<%s>%s@%s|%s|%s|%s| ' % str_tup_m5 + self.nregion_txt
-        self.croppeddata()  #crop data and save
         
-
     #############################################################################################################################################################################                            
-    def croppeddata(self):    #Crop data and save 
+    def spit_to_csv(self):    #Crop data and save 
     #############################################################################################################################################################################                    
         
-        i5w_hr = self.crop_data(self.i5w,7,0)
-        r5w_hr = self.crop_data(self.r5w,7,0)
-        l5w_hr = self.crop_data(self.l5w,7,0) #.T.asfreq('5Min')
-        statsw_hr = self.crop_data(self.statsw,0,24)
+        i5w_hr = self.i5w
+        r5w_hr = self.r5w
+        l5w_hr = self.l5w
+        statsw_hr = self.statsw
         #Dump to csv in an attemp to use javascript d3 to read and display (in a nice format) the csv data
         i5w_d3 = ((i5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') #get rid of multi-index (Trading Periods), resample at 5min intervals, and fill NANs with zeros.
         r5w_d3 = ((r5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
@@ -452,95 +402,45 @@ class wits_ftp():
         i5w_d3.to_csv(self.wits_path + 'island_week.csv',float_format='%.4f') 
         r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.4f')
         l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.4f')
-        statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f')
-        
+        statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f') 
         #Dump just the current prices
         current_prices = DataFrame({'price':self.l5})
         current_prices = current_prices.reset_index().rename(columns={'index':'id'}).set_index('id').dropna()
         current_prices = current_prices[current_prices['price']>0]
         current_prices.to_csv(self.wits_path + 'price.csv',float_format='%.2f') 
-        #self.l5.to_csv(self.wits_path + 'price_l5.csv',float_format='%.2f')
         #Lets also groupby Trading periods and dump that to csv for the text alert system in mymailer.py
         all_week = read_csv(self.wits_path + 'all_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
         all_week['Date']=all_week.index.map(lambda x: x[0].date())
         all_week_bytp = all_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
         all_week_bytp.to_csv(self.wits_path + 'all_week_bytp.csv')
-        
         island_week = read_csv(self.wits_path + 'island_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
         island_week['Date']=island_week.index.map(lambda x: x[0].date())
         island_week_bytp = island_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
         island_week_bytp.to_csv(self.wits_path + 'island_week_bytp.csv')
-        
         region_week = read_csv(self.wits_path + 'region_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
         region_week['Date']=region_week.index.map(lambda x: x[0].date())
         region_week_bytp = region_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
         region_week_bytp.to_csv(self.wits_path + 'region_week_bytp.csv')
 
-            
-    #############################################################################################################################################################################                                    
-    def save_dataframes(self):
-    #############################################################################################################################################################################                            
-        #Now save to live5 
-        live5 = HDFStore(self.wits_path + 'live5.h5','a')  #open live5.h5 file
-        live5['l5w'] = self.l5w                 #Update/replace the rolling 5 minute prices saved as a rolling day
-        live5['r5w'] = self.r5w
-        live5['i5w'] = self.i5w
-        live5['statsw'] = self.statsw
-        live5.close()
-
     #############################################################################################################################################################################                            
     def ftp_data_process(self):        #grab both files, combine, put into pandas series object
     #############################################################################################################################################################################                            
-        #Do the FTP stuff
-        self.f = {'i': None, 'p':None}   #reset price and infeasible files
+
         self.ftp_filenames()             #get the first part of the filenames to match
         self.ftp_connect()               #connect to ftp server
-        if self.ftp_error == False:  #i.e., if we got data then process it
+        if self.ftp_error == False:     #i.e., if we got data then process it
            self.ftp_get('p')             #try and get price
-           self.ftp_get('i')
-           self.ftp_get('s')   #new summary file download
-     
+           self.ftp_get('i')             #get infesability files
+           self.ftp_get('s')             #get the summary file download
         self.ftp_quit()
-        #Place into DataFrames and do the stats, etc...
         self.ftp_pandas()                #Ok, so we have the data, now process to pandas object
-        #update pickled files
-        self.update_df(self.wits_path + 'l5w.pickle',self.l5,self.mult_idx,7,0)
-        self.update_df(self.wits_path + 'r5w.pickle',self.r5,self.mult_idx,7,0)
-        self.update_df(self.wits_path + 'i5w.pickle',self.i5,self.mult_idx,7,0)
-        self.update_df(self.wits_path + 's5w.pickle',self.s5,self.mult_idx,7,0)
-        self.update_df(self.wits_path + 'statsw.pickle',self.stats,self.mult_idx,7,0)
-
-    
-    #############################################################################################################################################################################                            
-    def load_h5_data(self):        #First we check the working directory for an existing live5.h5 
-    #############################################################################################################################################################################                            
-        pickle_it = False
-
-        for f in os.listdir(self.wits_path):
-            if f == 'live5.h5':
-                self.l5w = read_hdf(self.wits_path + 'live5.h5','l5w')
-                self.r5w = read_hdf(self.wits_path + 'live5.h5','r5w')
-                self.i5w = read_hdf(self.wits_path + 'live5.h5','i5w')
-                self.statsw = read_hdf(self.wits_path + 'live5.h5','statsw')
-        
-        temp_pickle_out = False
-        if temp_pickle_out == True:
-            self.l5w.to_pickle(self.wits_path + 'l5w.pickle')
-            self.r5w.to_pickle(self.wits_path + 'r5w.pickle')
-            self.i5w.to_pickle(self.wits_path + 'i5w.pickle')
-            self.statsw.to_pickle(self.wits_path + 'statsw.pickle')
-
-        if pickle_it == True:
-            if os.path.isfile(self.wits_path + 'l5w.pickle'):
-                self.l5w = read_pickle('l5w.pickle')
-            if os.path.isfile(self.wits_path + 'r5w.pickle'):
-                self.r5w = read_pickle('r5w.pickle')
-            if os.path.isfile(self.wits_path + 'i5w.pickle'):
-                self.i5w = read_pickle('i5w.pickle')
-            if os.path.isfile(self.wits_path + 's5w.pickle'):
-                self.s5w = read_pickle('s5w.pickle')
-            if os.path.isfile(self.wits_path + 'statsw.pickle'):
-                self.statsw = read_pickle('statsw.pickle')
+        self.l5w = self.update_df(self.wits_path + 'l5w.pickle',self.l5,self.mult_idx,7,0)         #update pickled files
+        self.r5w = self.update_df(self.wits_path + 'r5w.pickle',self.r5,self.mult_idx,7,0)
+        self.i5w = self.update_df(self.wits_path + 'i5w.pickle',self.i5,self.mult_idx,7,0)
+        self.s5w = self.update_df(self.wits_path + 's5w.pickle',self.s5,self.mult_idx,7,0)
+        self.statsw = self.update_df(self.wits_path + 'statsw.pickle',self.stats,self.mult_idx,7,0)
+        self.update_prices()
+        self.spit_to_csv()  #as the name suggests... we could add this to update_df --todo
 
     #############################################################################################################################################################################                            
     def crop_data(self,data,days,hours):        #First we check the working directory for an existing live5.h5 
@@ -549,21 +449,15 @@ class wits_ftp():
         dataT = data.T #Transpose data
         lastest_data = data.columns[-1] #the lastest dispatch time stamp in the h5 file
         lastest_date = lastest_data[0].date() #latest date
-        #Get cropped data
-        cropped_data  = dataT[dataT.index.levels[0]>=(lastest_data[0]-(dt.timedelta(days = days,hours=hours)))]
-        return cropped_data.T
-          
+        cropped_data  = dataT[dataT.index.levels[0]>=(lastest_data[0]-(dt.timedelta(days = days,hours=hours)))]        
+        return cropped_data.T 
         
     #############################################################################################################################################################################                            
     def report_prices(self):
     #############################################################################################################################################################################                            
-        #try:
-            self.msg_text = self.l5w.T[-1:].T.idxmax()[0] + '=$' + str(self.l5w.T[-1:].T.max()[0]) + '/MWh' #,@' + str(self.l5w.T.index[-1][0])[:-3]
-            self.sub_text = 'Price alert @ ' + str(self.l5w.columns[-1][0])
-        #except:
-        #    error_text = "Unable to form string - Bad data"
-        #    logger.error(error_text)
-        #    TryFormString(error_text)
+        
+        self.msg_text = self.l5w.T[-1:].T.idxmax()[0] + '=$' + str(self.l5w.T[-1:].T.max()[0]) + '/MWh' #,@' + str(self.l5w.T.index[-1][0])[:-3]
+        self.sub_text = 'Price alert @ ' + str(self.l5w.columns[-1][0])
 
 #############################################################################################################################################################################                            
 #Start the programme
@@ -573,9 +467,6 @@ msg_len = 194
 if __name__ == '__main__':
     time1 = dt.datetime.now() 
     ftp_data = wits_ftp(cmd_line.ftp_host,cmd_line.ftp_user,cmd_line.ftp_pass,cmd_line.wits_path)  #create class instance
-    time1b = dt.datetime.now()
-    ftp_data.load_h5_data()     #load current live5 data
-    time1c = dt.datetime.now()
     ftp_data.ftp_data_process() #FTP the wits server and get the lastest 5 minute data
     time2 = dt.datetime.now()
     ftp_data.report_prices() 
