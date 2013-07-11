@@ -40,12 +40,6 @@ Used with the following crontab
     --ftp_pass='password' --ftp_user='user' >> /home/dave/python/wits_ftp/wits_ftp_cron.log 2>&1
 
 Now tracking this project directory with GIT (10/8/2012) 
-
-TO DO: Upgrade HDFStore storage routines, much recent work on pandas has impoved this no end, but I'm not using this 
-       well at all - needs sorting
-       General update - ultimately storage as integers would be nice - there are problems though, including how the GXP
-       data can change, etc.
-       
        
 **KNOWN ISSUES**
 **Between December 5 and December 19, 2012, this script stopped outputing prices, reason was lack of a published 
@@ -85,8 +79,8 @@ parser.add_argument('--ftp_user', action="store",dest='ftp_user',default='ecom')
 parser.add_argument('--ftp_pass', action="store",dest='ftp_pass')
 
 parser.add_argument('--wits_path', action="store",dest='wits_path',default='/home/dave/python/wits_ftp/')
-parser.add_argument('--proxy_host', action="store",dest='proxy_host',default='172.29.52.79') #use earnie as of 22/8/2012. Use 127.0.0.1 when using cntlm on workstation...
-parser.add_argument('--proxy_port', action="store",dest='proxy_port',default='8081') #use earnie as of 22/8/2012. Use 3128 when using cntlm on workstation...
+parser.add_argument('--proxy_host', action="store",dest='proxy_host',default='172.29.52.79') #use eaintranet as of ~5/2013. Use 127.0.0.1 when using cntlm on workstation...
+parser.add_argument('--proxy_port', action="store",dest='proxy_port',default='8081') #use earnie as of ~5/2013. Use 3128 when using cntlm on workstation...
 cmd_line = parser.parse_args()
 
 #############################################################################################################################################################################        
@@ -123,7 +117,6 @@ class FTPfilefoundError(Exception): pass
 class GZIPfileError(Exception): pass
 class WITSFileNameGuessError(Exception): pass
 class FTPRetrBinaryError(Exception): pass
-
 
 class wits_ftp():
    
