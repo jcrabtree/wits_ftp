@@ -40,7 +40,8 @@ terms and conditions.
 (b) The Authority's Electricity Market Information tool (EMI), a Windows-based application developed by the Authority to
 facilitate use of the Models, provides the user interface for DOASA. You cannot use DOASA without using EMI.
 (c) DOASA uses CLP, the COIN-OR open source LP code. CLP is distributed under the Eclipse Public Licence (version 0.1).
-You are responsible for complying with the Eclipse Public Licence in respect of your commercial use of DOASA and the Authority will have no liability or responsibility arising out of your breach of the Eclipse Public Licence terms and
+You are responsible for complying with the Eclipse Public Licence in respect of your commercial use of DOASA and the 
+Authority will have no liability or responsibility arising out of your breach of the Eclipse Public Licence terms and
 conditions.
 (d) You may use DOASA for the purposes of solving hydro-thermal scheduling problems and/or developing a policy for
 releasing water from reservoirs for electricity generation.
@@ -56,11 +57,16 @@ Licence.
 
 (a) You assume sole responsibility for the installation, use and results obtained from the Models.
 (b) The Authority does not warrant that the functions contained in the Models will meet your requirements or that the
-operation of the Models will be uninterrupted or error free. The entire risk as to the quality and performance of the Models is with you.
+operation of the Models will be uninterrupted or error free. The entire risk as to the quality and performance of the 
+Models is with you.
 (c) The Authority excludes, to the extent permissible by law, all representations, warranties or guarantees whether
-expressed or implied including, without limitation, any warranty or guarantee provided by the Sale of Goods Act 1908. You agree that you are acquiring the Licence of the Models for business purposes and therefore the Consumer Guarantees Act 1993 shall not apply to that supply.
+expressed or implied including, without limitation, any warranty or guarantee provided by the Sale of Goods Act 1908. 
+You agree that you are acquiring the Licence of the Models for business purposes and therefore the Consumer Guarantees 
+Act 1993 shall not apply to that supply.
 (d) In no event will the Authority be liable to you for any damages whatsoever, including lost profits, lost savings, or
-direct, indirect, incidental or consequential loss or damage arising out of the use or inability to use the Models, whether arising in contract, tort (including negligence) or otherwise, even if the Authority has been advised of the possibility of such damages or for any claim by any other party.
+direct, indirect, incidental or consequential loss or damage arising out of the use or inability to use the Models, 
+whether arising in contract, tort (including negligence) or otherwise, even if the Authority has been advised of the 
+possibility of such damages or for any claim by any other party.
 (e) If, notwithstanding the above clause, the Authority is held liable under this Licence or in relation to the Models
 the Authority's liability shall be limited to the sum of $1.00.
 
@@ -68,9 +74,12 @@ the Authority's liability shall be limited to the sum of $1.00.
 4. COPYRIGHT
 
 (a) You acknowledge that the Models are the subject of copyright. You shall not during or any time during or after the
-expiry or termination of the licence engage in or permit any act which infringes that copyright and, without limiting the generality of the foregoing, you specifically acknowledge that you may not copy or adapt the Models except as otherwise expressly authorised by this Licence.
+expiry or termination of the licence engage in or permit any act which infringes that copyright and, without limiting 
+the generality of the foregoing, you specifically acknowledge that you may not copy or adapt the Models except as 
+otherwise expressly authorised by this Licence.
 (b) You shall indemnify the Authority fully against all liabilities, costs and expenses which the Authority may incur to
-a third party as a result of any breach of this Licence where that breach is caused or permitted to be caused by you, or any of your employees, subcontractors, agents, or other party within your reasonable control.
+a third party as a result of any breach of this Licence where that breach is caused or permitted to be caused by you, or
+any of your employees, subcontractors, agents, or other party within your reasonable control.
 
 
 5. THIRD PARTY CLAIMS
