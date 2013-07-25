@@ -1,26 +1,26 @@
-    wits_ftp - automatic monitoring of New Zealand electricity prices 
-    Copyright (C) 2013 David Hume, Electricty Authority, New Zealand.
+wits_ftp - automatic monitoring of New Zealand electricity prices 
+Copyright (C) 2013, Electricty Authority, New Zealand.
 
-    LICENCE TO USE AUTHORITY MODELS
+LICENCE TO USE AUTHORITY MODELS
 
-    Electricity Authority, a Crown entity established under section 12 of the Electricity Industry Act 2010 (“the
-    Authority”) either owns or is authorised to licence applications, models and tools to support the Authority's
-    industry and market monitoring functions, including:
+Electricity Authority, a Crown entity established under section 12 of the Electricity Industry Act 2010 (“the
+Authority”) either owns or is authorised to licence applications, models and tools to support the Authority's
+industry and market monitoring functions, including:
     
     (a) Vectorised Scheduling Pricing and Dispatch (vSPD);
     (b) Hydro Supply Security test (HSS);
     (c) Electricity Market Information tool (EMI);
     (d) Dynamic Outer Approximation Sampling Algorithm (DOASA); and
     (e) except where we have informed you otherwise, any other applications, models and tools made available by the
-    Authority via the Authority's website, or at http://github.com, together the "Models".
+        Authority via the Authority's website, or at http://github.com, together the "Models".
     
-    Your use of the Models is subject to the following terms and conditions ("Licence"). By downloading or using a Model
-    you will be deemed to have agreed to this Licence without reservation or variation.
+Your use of the Models is subject to the following terms and conditions ("Licence"). By downloading or using a Model
+you will be deemed to have agreed to this Licence without reservation or variation.
 
-    1. USE RIGHTS AND LIMITATIONS
+1. USE RIGHTS AND LIMITATIONS
 
-    1.1 Unless we inform you otherwise, the following terms and conditions in sub-clauses 1.1(a) to 1.1(c) and clauses 2
-    to 7 apply to your use of Models other than DOASA:
+1.1 Unless we inform you otherwise, the following terms and conditions in sub-clauses 1.1(a) to 1.1(c) and clauses 2
+to 7 apply to your use of Models other than DOASA:
 
 (a) Subject to sub-clause (c) below, you may use, copy, adapt, modify, distribute, transfer, assign or sublicense the
 Models in whole or in part as you see fit for any purpose.
