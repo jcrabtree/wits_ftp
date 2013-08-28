@@ -86,41 +86,44 @@
 </header>
 
 <h1>realtime price monitor</h1>
+<h3>Reserves</h3>
+<div id="reserves"></div>
+
 <h3>Northland</h3>
 <div id="visNL"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Auckland</h3>
 <div id="visAK"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Waikato</h3>
 <div id="visHM"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Bay of Plenty</h3>
 <div id="visBP"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Hawkes Bay</h3>
 <div id="visNR"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Taranaki/Palmerston North</h3>
 <div id="visPN"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Lower North Island/Wellington</h3>
 <div id="visWN"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Upper South Island/Westcoast</h3>
 <div id="visWC"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Canterbury/Christchurch</h3>
 <div id="visCH"></div>
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a>
 
 <h3>Lower South Island</h3>
 <div id="visIN"></div>
@@ -129,7 +132,7 @@
   Mouse over the graph to inspect values.
 </aside>
 
-<p><a href="http://www.systemoperator.co.nz/f1686,80550110/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a></p>
+<p><a href="http://www.systemoperator.co.nz/f1686,84688506/SpdLocatordwg.pdf" target="_blank">Link to SPD locator diagram</a></p>
 
 
 <p>This page (updated every five minutes) illustrates real-time prices over the NZ electricity market over the past week.  </p>
@@ -142,6 +145,62 @@ It uses Javascript/D3 with the <a href="http://square.github.com/cubism/">cubism
 
 
 <script>
+//Reserves
+d3.csv("reserve_week.csv", function(data) {
+  if (!data) return new Error("unable to load data");
+
+  var contextR = cubism.context()
+    .serverDelay(30 * 1000) // allow 30 seconds of collection lag
+    .clientDelay(60 * 1000 *15) //allow approx. 15 minutes for wits/ftp lag
+    .step(5 * 60 * 1000) // five minutes per value
+    .size(data.length);  ; // fetch 400 values (1080p)
+
+  var <!--Reserves-->
+NIFIR=contextR.csv(data).metric("NIFIR"),
+NISIR=contextR.csv(data).metric("NISIR"),
+SIFIR=contextR.csv(data).metric("SIFIR"),
+SISIR=contextR.csv(data).metric("SISIR");
+
+var colors = ["#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff","#ADDD8E","#78C679","#41AB5D","#238443","#006837","#004529","#000000","#EF3B2C"];
+
+var h = 36;
+var extent = [0,400];
+
+<!--RESERVES-->
+  d3.select("#reserves").call(function(div) {
+
+    div.append("div")
+        .attr("class", "axis")
+        .call(contextR.axis().orient("top"));
+
+    div.selectAll(".horizon")
+        .data([NIFIR,NISIR,SIFIR,SISIR])
+      .enter().append("div")
+        .attr("class", "horizon")
+        .call(contextR.horizon().height(h).colors(colors).extent(extent));
+    div.append("div")
+        .attr("class", "rule")
+        .call(contextR.rule());
+    div.append("div")
+        .attr("class", "axis")
+        .call(contextR.axis().orient("bottom"));  
+  });
+
+    contextR.on("focus", function(i) {
+         d3.selectAll(".value").style("right", i == null ? null : contextR.size() - i + "px");
+}); 
+  contextR.on("change", function(start, stop) {
+    d3.select("#update-time").text("Last updated at " + stop + ".");
+});
+
+});
+
+
+    
+    
+    
+    
+//Prices    
 d3.csv("all_week.csv", function(data) {
   if (!data) return new Error("unable to load data");
 
@@ -155,12 +214,12 @@ d3.csv("all_week.csv", function(data) {
 ALB0331=context.csv(data).metric("ALB0331"),
 ALB1101=context.csv(data).metric("ALB1101"),
 BRB0331=context.csv(data).metric("BRB0331"),
-DAR0111=context.csv(data).metric("DAR0111"),
+//DAR0111=context.csv(data).metric("DAR0111"),
 KEN0331=context.csv(data).metric("KEN0331"),
 KOE1101=context.csv(data).metric("KOE1101"),
 MDN1101=context.csv(data).metric("MDN1101"),
 MDN2201=context.csv(data).metric("MDN2201"),
-MPE0331=context.csv(data).metric("MPE0331"),
+MPE1101=context.csv(data).metric("MPE1101"),
 MTO0331=context.csv(data).metric("MTO0331"),
 SVL0331=context.csv(data).metric("SVL0331"),
 WEL0331=context.csv(data).metric("WEL0331"),
@@ -431,7 +490,7 @@ var extent = [0,400];
         .call(context.axis().orient("top"));
 
     div.selectAll(".horizon")
-   .data([ALB0331,ALB1101,BRB0331,DAR0111,KEN0331,KOE1101,MDN1101,MDN2201,MPE0331,MTO0331,SVL0331,WEL0331])
+   .data([ALB0331,ALB1101,BRB0331,KEN0331,KOE1101,MDN1101,MDN2201,MPE1101,MTO0331,SVL0331,WEL0331])
       .enter().append("div")
         .attr("class", "horizon")
         .call(context.horizon().height(h).colors(colors).extent(extent));
@@ -606,6 +665,7 @@ var extent = [0,400];
     d3.select("#update-time").text("Last updated at " + stop + ".");
 });
 });
+
 </script>
 
 

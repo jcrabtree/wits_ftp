@@ -380,42 +380,6 @@ class wits_ftp():
         self.m5 = '%s@%s<%s>%s@%s|%s|%s|%s| ' % str_tup_m5 + self.nregion_txt
         
     #############################################################################################################################################################################                            
-    def spit_to_csv(self):    #Crop data and save 
-    #############################################################################################################################################################################                    
-        
-        i5w_hr = self.i5w
-        r5w_hr = self.r5w
-        l5w_hr = self.l5w
-        statsw_hr = self.statsw
-        #Dump to csv in an attemp to use javascript d3 to read and display (in a nice format) the csv data
-        i5w_d3 = ((i5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') #get rid of multi-index (Trading Periods), resample at 5min intervals, and fill NANs with zeros.
-        r5w_d3 = ((r5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
-        l5w_d3 = ((l5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
-        
-        i5w_d3.to_csv(self.wits_path + 'island_week.csv',float_format='%.4f') 
-        r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.4f')
-        l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.4f')
-        statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f') 
-        #Dump just the current prices
-        current_prices = DataFrame({'price':self.l5})
-        current_prices = current_prices.reset_index().rename(columns={'index':'id'}).set_index('id').dropna()
-        current_prices = current_prices[current_prices['price']>0]
-        current_prices.to_csv(self.wits_path + 'price.csv',float_format='%.2f') 
-        #Lets also groupby Trading periods and dump that to csv for the text alert system in mymailer.py
-        all_week = read_csv(self.wits_path + 'all_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
-        all_week['Date']=all_week.index.map(lambda x: x[0].date())
-        all_week_bytp = all_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
-        all_week_bytp.to_csv(self.wits_path + 'all_week_bytp.csv')
-        island_week = read_csv(self.wits_path + 'island_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
-        island_week['Date']=island_week.index.map(lambda x: x[0].date())
-        island_week_bytp = island_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
-        island_week_bytp.to_csv(self.wits_path + 'island_week_bytp.csv')
-        region_week = read_csv(self.wits_path + 'region_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['index','TP'])*100.0
-        region_week['Date']=region_week.index.map(lambda x: x[0].date())
-        region_week_bytp = region_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
-        region_week_bytp.to_csv(self.wits_path + 'region_week_bytp.csv')
-
-    #############################################################################################################################################################################                            
     def ftp_data_process(self):        #grab both files, combine, put into pandas series object
     #############################################################################################################################################################################                            
 
@@ -434,6 +398,52 @@ class wits_ftp():
         self.statsw = self.update_df(self.wits_path + 'statsw.pickle',self.stats,self.mult_idx,7,0)
         self.update_prices()
         self.spit_to_csv()  #as the name suggests... we could add this to update_df --todo
+
+    #############################################################################################################################################################################                            
+    def spit_to_csv(self):    #Crop data and save 
+    #############################################################################################################################################################################                    
+        
+        i5w_hr = self.i5w
+        r5w_hr = self.r5w
+        l5w_hr = self.l5w
+        s5w_hr = self.s5w
+
+        statsw_hr = self.statsw
+        #Dump to csv in an attemp to use javascript d3 to read and display (in a nice format) the csv data
+        i5w_d3 = ((i5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') #get rid of multi-index (Trading Periods), resample at 5min intervals, and fill NANs with zeros.
+        r5w_d3 = ((r5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
+        l5w_d3 = ((l5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
+        s5w_d3 = ((s5w_hr.T)/100.0).reset_index(level=1).asfreq('5Min') 
+        
+        s5w_d3 = s5w_d3.rename(columns=dict(zip(s5w_d3.columns,s5w_d3.columns.map(lambda x: x.replace(' ','_')))))      
+        s5w_d3 = s5w_d3.rename(columns=dict(zip(["NI_Fast_Reserve_Price","NI_Sustained_Reserve_Price","SI_Fast_Reserve_Price","SI_Sustained_Reserve_Price"],["NIFIR","NISIR","SIFIR","SISIR"])))
+       
+        i5w_d3.to_csv(self.wits_path + 'island_week.csv',float_format='%.4f') 
+        r5w_d3.to_csv(self.wits_path + 'region_week.csv',float_format='%.4f')
+        l5w_d3.to_csv(self.wits_path + 'all_week.csv',float_format='%.4f')
+        s5w_d3.to_csv(self.wits_path + 'reserve_week.csv',float_format='%.4f')
+
+        statsw_hr.T.to_csv(self.wits_path + 'stats_week.csv',float_format='%.4f') 
+        #Dump just the current prices
+        current_prices = DataFrame({'price':self.l5})
+        current_prices = current_prices.reset_index().rename(columns={'index':'id'}).set_index('id').dropna()
+        current_prices = current_prices[current_prices['price']>0]
+        current_prices.to_csv(self.wits_path + 'price.csv',float_format='%.2f') 
+        #Lets also groupby Trading periods and dump that to csv for the text alert system in mymailer.py
+        all_week = read_csv(self.wits_path + 'all_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['dto','TP'])*100.0
+        #print all_week.columns
+        all_week['Date']=all_week.index.map(lambda x: x[0].date())
+        all_week_bytp = all_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        all_week_bytp.to_csv(self.wits_path + 'all_week_bytp.csv')
+        island_week = read_csv(self.wits_path + 'island_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['dto','TP'])*100.0
+        island_week['Date']=island_week.index.map(lambda x: x[0].date())
+        island_week_bytp = island_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        island_week_bytp.to_csv(self.wits_path + 'island_week_bytp.csv')
+        region_week = read_csv(self.wits_path + 'region_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['dto','TP'])*100.0
+        region_week['Date']=region_week.index.map(lambda x: x[0].date())
+        region_week_bytp = region_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        region_week_bytp.to_csv(self.wits_path + 'region_week_bytp.csv')
+
 
     #############################################################################################################################################################################                            
     def crop_data(self,data,days,hours):        #First we check the working directory for an existing live5.h5 
