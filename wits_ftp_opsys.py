@@ -430,18 +430,18 @@ class wits_ftp():
         current_prices = current_prices[current_prices['price']>0]
         current_prices.to_csv(self.wits_path + 'price.csv',float_format='%.2f') 
         #Lets also groupby Trading periods and dump that to csv for the text alert system in mymailer.py
-        all_week = read_csv(self.wits_path + 'all_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['dto','TP'])*100.0
-        #print all_week.columns
+        all_week = read_csv(self.wits_path + 'all_week.csv',index_col=[0,1],parse_dates=True)*100#.reset_index().set_index([[0,1]])*100.0
+        #print all_week.index
         all_week['Date']=all_week.index.map(lambda x: x[0].date())
-        all_week_bytp = all_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        all_week_bytp = all_week.fillna(0).groupby(level=[0,1]).mean()
         all_week_bytp.to_csv(self.wits_path + 'all_week_bytp.csv')
-        island_week = read_csv(self.wits_path + 'island_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['dto','TP'])*100.0
+        island_week = read_csv(self.wits_path + 'island_week.csv',index_col=[0,1],parse_dates=True)*100 #.reset_index().set_index([[0,1]])*100.0
         island_week['Date']=island_week.index.map(lambda x: x[0].date())
-        island_week_bytp = island_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        island_week_bytp = island_week.fillna(0).groupby(level=[0,1]).mean()
         island_week_bytp.to_csv(self.wits_path + 'island_week_bytp.csv')
-        region_week = read_csv(self.wits_path + 'region_week.csv',index_col=0,parse_dates=True).reset_index().set_index(['dto','TP'])*100.0
+        region_week = read_csv(self.wits_path + 'region_week.csv',index_col=[0,1],parse_dates=True)*100 #.reset_index().set_index([[0,1]])*100.0
         region_week['Date']=region_week.index.map(lambda x: x[0].date())
-        region_week_bytp = region_week.reset_index().set_index(['Date','TP']).fillna(0).groupby(level=[0,1]).mean()
+        region_week_bytp = region_week.fillna(0).groupby(level=[0,1]).mean()
         region_week_bytp.to_csv(self.wits_path + 'region_week_bytp.csv')
 
 
