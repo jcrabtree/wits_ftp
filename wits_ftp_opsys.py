@@ -1,55 +1,22 @@
 '''
-   wits_ftp - automatic monitoring of New Zealand electricity prices
-    Copyright (C) 2013 David Hume, Electricty Authority, New Zealand.
+wits_ftp - automatic monitoring of New Zealand electricity prices
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Copyright (C) 2013, Electricty Authority, New Zealand.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+License, see https://github.com/ElectricityAuthority/LICENSE/blob/master/LICENSE.md
 
 This is the wits_ftp class.  It is used to connect, login, download, convert and save the WITS 5 minute price data.   
-This is part of the spot price alert system implemented by the New Zealand Electricty Authority.
-
-This originated from a simple "matlab like" script (spot_price_ftp_v0.4.py) but is now more functionized using a class and 
-various function definitions in Python. 
-
-Overall, there are two independent parts to the spot price alert system.  Both run as separate processes, 
-but linked through a shared file, live5.h5
-
-Process 1. This part, an FTP client, connects, determines what file to download, downloads the file (to memory), 
-processes the file and saves this file containing:
- 1. the 5 minute prices for the previous 5 minutes live5[live5], and,
- 2. a rolling half-hourly 
-Process 2. A price_stats_alert.py script that calculates various statistics on the five minute data and, if alert 
-conditions are met, alerts people through the MyMailer class. 
-
-This script makes heavy use of the Wes McKinney's amazing Pandas module (thanks Wes!) 
 
 Used with the following crontab
 
 */5 * * * * /usr/bin/python /home/dave/python/wits_ftp/wits_ftp_opsys.py 
     --ftp_pass='password' --ftp_user='user' >> /home/dave/python/wits_ftp/wits_ftp_cron.log 2>&1
 
-Now tracking this project directory with GIT (10/8/2012) 
-       
 **KNOWN ISSUES**
-**Between December 5 and December 19, 2012, this script stopped outputing prices, reason was lack of a published 
-infeasibility file -- fixed December 19, 2012**
-**NOTE: In development, on some systems (i.e., within a restricted coporate environment like the EA) an HTTP tunnel is 
-required due to combination of proxy issues/settings and the python FTPlib module.
 **proxy host required for the ftp instance, via an HTTP tunnel, i.e., socket mapping...At the EA the ECOM proxy servers 
 appear to disallow FTP transfer.  
 
-David Hume, 23/01/2013.
+David Hume, 2/9/2013.
 
 '''
 import smtplib
