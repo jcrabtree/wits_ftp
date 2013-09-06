@@ -24,9 +24,6 @@
 	margin-bottom:20px;
 }
 
-
-
-
 .q0-35 { fill:rgb(254,254,154); }
 .q1-35 { fill:rgb(206,234,147); }
 .q2-35 { fill:rgb(173,221,142); }
@@ -113,8 +110,6 @@
 <script src="js/bootstrap.min.js"></script>
 
 <script>
-    
-    
 
 var slider = d3.select("#slider").selectAll("div")
                 .data(d3.entries({epsilon: 200}))
@@ -123,15 +118,14 @@ var slider = d3.select("#slider").selectAll("div")
 
 var green_scale = ["rgb(254,254,154)","rgb(206,234,147)","rgb(173,221,142)","rgb(151,211,137)","rgb(138,206,132)","rgb(130,202,129)","rgb(125,200,125)","rgb(120,198,121)","rgb(111,194,116)","rgb(100,190,110)","rgb(88,184,105)","rgb(75,178,99)","rgb(64,170,92)","rgb(56,163,87)","rgb(49,155,81)","rgb(44,147,75)","rgb(39,139,71)","rgb(35,131,66)","rgb(29,125,63)","rgb(24,119,60)","rgb(19,114,58)","rgb(14,109,56)","rgb(10,104,55)","rgb(6,98,53)","rgb(3,92,51)","rgb(2,85,48)","rgb(0,77,45)","rgb(0,68,40)","rgb(0,58,35)","rgb(0,47,29)","rgb(0,36,22)","rgb(0,25,16)","rgb(0,15,10)","rgb(0,6,4)","#EF3B2C"];
                 
-
-
-
 var width = 2460,
     height = 3180;
 
-var gxps_on_off="off";
+var gxps_on_off="on";
 
-var byid =d3.map();
+var price = d3.map();
+var latitude = d3.map();
+var longitude = d3.map();
 
 var projection = d3.geo.mercator()
     .scale(10000)
@@ -144,58 +138,65 @@ var svg = d3.select("#map").append("svg")
         .attr("viewBox", "0 0 " + width + " " + height )
         .attr("preserveAspectRatio", "xMidYMid meet")
         .attr("id","map_of_nz");
+        
+
 queue()
     .defer(d3.json, "/nz_gxp.json")
-    .defer(d3.csv, "price.csv",function(d) {byid.set(d.id,+d.price); })
-    .defer(d3.csv, "gxps_filtered.csv") 
+    .defer(d3.csv, "price.csv",function(d) {price.set(d.id,+d.price); })
+    .defer(d3.csv, "gxps_filtered.csv",function(d) {latitude.set(d.id,+d.lat); longitude.set(d.id,+d.long); }) 
     .await(ready);
 
-function ready(error, nz_gxp) {
-	var quantize = d3.scale.quantize()
-    .domain([Math.log(d3.min(d3.values(byid))), Math.log(400)])
+function ready(error, nz_gxp) { 
+    
+    function add_gxps() {
+        d3.csv("gxps_filtered.csv", function(error, data) {
+    svg.selectAll("circle")
+       .data(data)
+     .enter()
+       .append("circle")
+       .attr("cx", function(d) {return projection([d.long, d.lat])[0];})
+       .attr("cy", function(d) {return projection([d.long, d.lat])[1];})
+       .attr("r", 10)
+       .attr("class",function(d) { return quantize(Math.log(price.get(d.id)))})
+       .attr("stroke","black")
+       .attr("id","gxps")
+     .on('mouseover', function(d) { 
+		d3.select("#tooltip")
+			.select("#value")
+            .text(console.log(d.id))
+            .text(d.id + ' = $' + price.get(d.id));
+		d3.select("#tooltip").classed("hidden", false);});}    
+    ); 
+}    
+
+    var quantize = d3.scale.quantize()
+    .domain([Math.log(d3.min(d3.values(price))), Math.log(400)])
     .range(d3.range(35).map(function(i) { return "q" + i + "-35"; }));
+
 
     svg.append("g")
       .selectAll("path")
         .data(topojson.feature(nz_gxp, nz_gxp.objects.GXP_WGS84).features)
         .enter().append("path")
-        .attr("class", function(d) { return quantize(Math.log(byid.get(d.id)));})
+        .attr("class", function(d) { return quantize(Math.log(price.get(d.id)));})
         .attr("d", path);
-        
+        add_gxps();    
         d3.select('button').on('click',function() {
-            if ( gxps_on_off==="off" ) {
-                console.log("We have a gxps_on_off");
-                //var gxps = svg.append("g");
-                 d3.csv("gxps_filtered.csv", function(error, data) {
-                 var gxps = svg.selectAll("circle")
-                   .data(data)
-                 .enter()
-                   .append("circle")
-                   .attr("cx", function(d) {return projection([d.long, d.lat])[0];})
-                   .attr("cy", function(d) {return projection([d.long, d.lat])[1];})
-                   .attr("r", 10)
-                   .attr("class",function(d) { return quantize(Math.log(byid.get(d.id)))})
-                   .attr("stroke","black")
-                   .attr("id","gxps")
-                 .on('mouseover', function(d) { 
-					d3.select("#tooltip")
-						.select("#value")
-                        .text(console.log(d.id))
-                        .text(d.id + ' = $' + byid.get(d.id));
-					d3.select("#tooltip").classed("hidden", false);});}    
-            ); 
-            gxps_on_off = "on";
-            console.log(gxps_on_off);}
-        else {
-                console.log("Try and remove bloody gxps!!");
+            if ( gxps_on_off==="on" ) {
                 svg.selectAll("circle").remove();
                 gxps_on_off = 'off';
+            gxps_on_off = "off";
+            console.log(gxps_on_off);}
+        else {
+            add_gxps();
+            gxps_on_off = "on";
+
           }
 });
     svg.selectAll("path").on('mouseover', function(d) { 
 					d3.select("#tooltip")
 						.select("#value")
-						.text(d.properties.name + '(' + d.id + ') = $' + byid.get(d.id));
+						.text(d.properties.name + '(' + d.id + ') = $' + price.get(d.id));
 					d3.select("#tooltip").classed("hidden", false);
 		});
     }
